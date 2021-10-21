@@ -1,13 +1,9 @@
 package com.example.opensociety.db
 
-import android.content.ContentResolver
 import android.content.ContentUris
-import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.content.contentValuesOf
 import org.json.JSONObject
 import java.lang.Exception
@@ -29,18 +25,23 @@ class Contacts(context: Context) {
             Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_HASH_LIST)
     }
 
-    public fun add_friend(json: JSONObject, status: Int) {
+    public fun add_friend(friend: Friend): Long? {
+        val id = context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
+            ContentUris.parseId(it)
+        } ?: return null
+        updateHash(id)
+        return id
+    }
+
+    public fun add_friend(json: JSONObject, status: Int): Long? {
         val friend = Friend(json, Friend.Status.intToStatus(status))
         if (find_contact(JSONObject().put(Friend.NICK, friend.nick)
                 .put(Friend.FIRST_NAME, friend.first_name)
                 .put(Friend.SECOND_NAME, friend.second_name)
                 .put(Friend.FAMILY_NAME, friend.family_name)) != null) {
-            friend.status = Friend.Status.DUBLICATE
+            friend.status = Friend.Status.DUPLICATE
         }
-        val id = context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
-            ContentUris.parseId(it)
-        } ?: return
-        updateHash(id)
+        return add_friend(friend)
     }
 
     public fun add_friend(json: JSONObject) = add_friend(json, json.getInt(Friend.STATUS))
@@ -63,6 +64,13 @@ class Contacts(context: Context) {
                 Friend.FAMILY_NAME
         )
         return cursor?.let { cursorToContack(it) } ?: null
+    }
+
+    fun contactID(contact_hash:Long):Long? {
+        var cursor = context.contentResolver?.query(
+            Contacts.CONTACTS_URI, arrayOf(DbStructure.F_ID), Friend.HASH + " = ?",
+            arrayOf(contact_hash.toString()), null)
+        return cursor?.let { it.takeIf { it.moveToFirst()}?.let{it.getLong(0)} } ?: null
     }
 
     public fun updateContactIP(id: Long, ip: String) =
@@ -148,7 +156,7 @@ class Contacts(context: Context) {
                     cursor.getString(cursor.getColumnIndex(Friend.FAMILY_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.AVATAR)),
                     Friend.Status.valueOf(cursor.getString(cursor.getColumnIndex(Friend.STATUS))),
-                    cursor.getInt(cursor.getColumnIndex(Friend.HASH)),
+                    cursor.getLong(cursor.getColumnIndex(Friend.HASH)),
                     cursor.getLong(cursor.getColumnIndex(Friend.ID))
                 )
             } while (cursor.moveToNext())

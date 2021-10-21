@@ -34,7 +34,7 @@ class DbStructure(context: Context):
         val F_FRIEND_ID = "friend_id"
         val F_PARENT_ID = "parent_id"
         val F_MESSAGE_ID = "message_id"
-        val F_CHAT_ID = "chat_id"
+        val F_CHAT_HASH = "chat_hash"
         val F_VIEWER_ID = "viewer_id"
         val F_AUTHOR_ID = "author_id"
         val F_CONTACT_ID = "contact_id"
@@ -57,11 +57,11 @@ class DbStructure(context: Context):
             db.execSQL("CREATE TABLE " + TB_NEWS + "( " + F_ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_MESSAGE_ID + " INTEGER);");
             db.execSQL("CREATE TABLE " + TB_CHATS_LIST + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_PARENT_ID + " INTEGER, "
-                    + F_FRIEND_ID + " TEXT);");
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_PARENT_ID + " INTEGER, " +
+                    F_HASH + " INTEGER UNIQUE," + F_FRIEND_ID + " TEXT);");
             db.execSQL("CREATE TABLE " + TB_MESSAGES + "( " + F_ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_AUTHOR_ID + " INTEGER, " +
-                    F_CHAT_ID + " INTEGER" + F_IS_SYNC + " TEXT, " + F_DATA + " TEXT);");
+                    F_IS_SYNC + " TEXT, " + F_DATA + " TEXT);");
             db.execSQL("CREATE TABLE " + TB_VIEWERS + "( " + F_ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_MESSAGE_ID + " INTEGER, " +
                     F_FRIEND_ID+ " INTEGER, UNIQUE (" + F_MESSAGE_ID  + ", " + F_FRIEND_ID + ");")

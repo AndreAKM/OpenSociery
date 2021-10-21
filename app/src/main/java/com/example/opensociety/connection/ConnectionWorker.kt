@@ -2,6 +2,7 @@ package com.example.opensociety.connection
 
 import android.content.Context
 import android.util.Log
+import com.example.opensociety.db.ChatManager
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
 import com.example.opensociety.db.Message
@@ -47,7 +48,7 @@ class ConnectionWorker(socket: Socket, context: Context): Runnable {
         }
     }
     var contacts = Contacts(context)
-    var message = Message()
+    var chat_m = ChatManager(context)
     fun inputProcess(data: String): String {
         val json = JSONObject(data)
         var result = ""
@@ -55,7 +56,7 @@ class ConnectionWorker(socket: Socket, context: Context): Runnable {
             ACCESS_REQUEST -> contacts.add_friend(json.getJSONObject(DATA),
                 Friend.Status.APPLIED.ordinal)
             ACCESS_ANSWER -> contacts.add_friend(json)
-            MESSAGE -> message.JsonToMessage(json.getJSONObject(DATA))
+            MESSAGE -> chat_m.registrationInputMessage(json)
             HASH -> contacts.updateContactHash(json.getJSONObject(DATA))
             IP -> contacts.updateContactIP(json.getJSONObject(DATA))
             GET_CONTATS -> result = contacts.get_contacts(json.getJSONObject(DATA)).toString()
