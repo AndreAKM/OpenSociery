@@ -5,10 +5,10 @@ import android.content.Intent
 import android.os.IBinder
 
 class FoneClientService : Service() {
-    private val server:Server? = null
+    private var server:Server? = null
     override fun onCreate() {
         super.onCreate()
-        server = Server()
+        server = Server(this)
     }
 
     override fun onBind(intent: Intent): IBinder {

@@ -7,7 +7,7 @@ import org.json.JSONObject
 class Friend(ip: String = "", nick: String = "",
              first_name: String = "", second_name: String = "",
              family_name: String = "", avatar: String = "",
-             status: Status = Status.APPLIED, hash:Int, id: Long? ) {
+             status: Status = Status.APPLIED, hash:Long = 0, id: Long? = null ) {
 
     var id = id
     var ip = ip
@@ -20,14 +20,24 @@ class Friend(ip: String = "", nick: String = "",
     var hash = hash
 
     enum class Status {
-        APPLIED, CLOSED, FRIEND, VIEWER, DUBLICATE;
+        APPLIED,    // The contacts asked to be friend not answered yet
+        CLOSED,     // The contacts are not allowed to look at our activity
+        FRIEND,     // The contacts have the whole access to our date
+        VIEWER,     // The contacts see only our publications
+        DUPLICATE,  // New contacts which have the same names. Possible it is a reconnection
+        REMOUTE,    // There are some publication by the contacts were met
+        SUBSCRIPTION,// We collect only publications by the contacts
+        UNKNOWN;    // We know only hash the other information is being looked for.
         companion object {
             fun intToStatus(value: Int) = when (value) {
                 1 -> APPLIED
                 2 -> CLOSED
                 3 -> FRIEND
                 4 -> VIEWER
-                else -> DUBLICATE
+                5 -> DUPLICATE
+                6 -> REMOUTE
+                7 -> SUBSCRIPTION
+                else -> UNKNOWN
             }
         }
     }
@@ -58,7 +68,7 @@ class Friend(ip: String = "", nick: String = "",
     constructor(jsonObject: JSONObject, status: Status) : this(jsonObject.getString(IP),
         jsonObject.getString(NICK), jsonObject.getString(FIRST_NAME), jsonObject.getString(SECOND_NAME),
         jsonObject.getString(FAMILY_NAME), jsonObject.getString(AVATAR), status,
-        jsonObject.getInt(HASH),null) {
+        jsonObject.getLong(HASH),null) {
         if (jsonObject.has(ID)) {
             id = jsonObject.getLong(ID)
         }

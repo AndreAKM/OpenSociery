@@ -8,7 +8,7 @@ import java.io.IOException
 
 class Connection(host: String, port: Int) {
     private final val LOG_TAG = "Connection"
-    private var socket: Socket?
+    private var socket: Socket? = null
     private var host = host
     private var port = port
 
@@ -38,7 +38,7 @@ class Connection(host: String, port: Int) {
         socket = null
     }
 
-    public fun sendData(data: ByteArray {
+    public fun sendData(data: ByteArray) {
         if (socket == null || socket!!.isClosed) {
             throw Exception(
                 "Error of sending data. " +

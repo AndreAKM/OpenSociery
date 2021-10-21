@@ -1,5 +1,6 @@
 package com.example.opensociety.connection
 
+import android.content.Context
 import android.util.Log
 import java.lang.Exception
 import java.net.ServerSocket
@@ -8,10 +9,12 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
 
-class Server {
+class Server(context: Context) {
     private val TAG = "Server"
 
     private val SERVER_PORT = 9876
+
+    private val context = context
     private var serverSoket: ServerSocket? = null
 
     private var callableDelay = CallableDelay()
@@ -48,9 +51,8 @@ class Server {
                 var worker: ConnectionWorker? = null
                 try {
                     // Ожидание соединения с клиентом
-                    worker = ConnectionWorker(
-                        serverSoket.accept()
-                    )
+                    worker = serverSoket?.let {ConnectionWorker(it.accept(), context)} ?: null
+
                     /*
                  * Обработка соединения выполняется
                  * в отдельном потоке
@@ -63,7 +65,7 @@ class Server {
                                 + e.message
                     )
                     // Завершение цикла.
-                    if (serverSoket.isClosed()) break
+                    if (serverSoket!!.isClosed) break
                 }
             }
             Log.d(
@@ -90,7 +92,7 @@ class Server {
             // Останов 2-ой задачи
             futureTask[1].cancel(true);
             // Закрытие серверного сокета
-            serverSoket.close();
+            serverSoket!!.close();
 
             Log.d(TAG, "Thread '"
                     + Thread.currentThread().getName()
