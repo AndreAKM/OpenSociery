@@ -28,8 +28,15 @@ class Contacts(context: Context) {
         val HASH_LIST_URI: Uri =
             Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_HASH_LIST)
     }
+
     public fun add_friend(json: JSONObject, status: Int) {
         val friend = Friend(json, Friend.Status.intToStatus(status))
+        if (find_contact(JSONObject().put(Friend.NICK, friend.nick)
+                .put(Friend.FIRST_NAME, friend.first_name)
+                .put(Friend.SECOND_NAME, friend.second_name)
+                .put(Friend.FAMILY_NAME, friend.family_name)) != null) {
+            friend.status = Friend.Status.DUBLICATE
+        }
         val id = context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
             ContentUris.parseId(it)
         } ?: return
@@ -43,7 +50,6 @@ class Contacts(context: Context) {
         return result
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     public fun find_contact(json: JSONObject): Array<Friend>? {
         var select = ""
         var selectArgs = emptyArray<String>()

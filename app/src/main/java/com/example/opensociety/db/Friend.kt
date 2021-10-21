@@ -20,13 +20,14 @@ class Friend(ip: String = "", nick: String = "",
     var hash = hash
 
     enum class Status {
-        APPLIED, CLOSED, FRIEND, VIEWER;
+        APPLIED, CLOSED, FRIEND, VIEWER, DUBLICATE;
         companion object {
             fun intToStatus(value: Int) = when (value) {
                 1 -> APPLIED
                 2 -> CLOSED
                 3 -> FRIEND
-                else -> VIEWER
+                4 -> VIEWER
+                else -> DUBLICATE
             }
         }
     }
