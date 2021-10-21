@@ -1,6 +1,7 @@
 package com.example.opensociety.db
 
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -9,6 +10,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.contentValuesOf
 import org.json.JSONObject
+import java.lang.Exception
+import java.net.Inet4Address
+import java.net.Inet6Address
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.util.*
 
 class Contacts(context: Context) {
     val context = context
@@ -16,10 +23,17 @@ class Contacts(context: Context) {
     companion object {
         val CONTACTS_URI: Uri =
             Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_CONTACTS)
+        val IP_LIST_URI: Uri =
+            Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_IP_LIST)
+        val HASH_LIST_URI: Uri =
+            Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_HASH_LIST)
     }
     public fun add_friend(json: JSONObject, status: Int) {
         val friend = Friend(json, Friend.Status.intToStatus(status))
-        context.contentResolver.insert(CONTACTS_URI, friend.getContentValues());
+        val id = context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
+            ContentUris.parseId(it)
+        } ?: return
+        updateHash(id)
     }
 
     public fun add_friend(json: JSONObject) = add_friend(json, json.getInt(Friend.STATUS))
@@ -45,21 +59,29 @@ class Contacts(context: Context) {
         return cursor?.let { cursorToContack(it) } ?: null
     }
 
-    public fun updateContactIP(id: Int, ip: String) =
-        context.contentResolver.update(
-            Uri.withAppendedPath(CONTACTS_URI, id.toString()),
-            contentValuesOf(Pair(Friend.IP, ip)), null, null)
+    public fun updateContactIP(id: Long, ip: String) =
+        context.contentResolver. also {
+            it.update(
+                Uri.withAppendedPath(CONTACTS_URI, id.toString()),
+                contentValuesOf(Pair(Friend.IP, ip)), null, null)
+        }.insert(IP_LIST_URI,
+            contentValuesOf(Pair(Friend.IP, ip), Pair(DbStructure.F_CONTACT_ID, id)))
 
     public fun updateContactIP(json: JSONObject) =
-        updateContactIP(json.getInt(Friend.ID), json.getString(Friend.IP))
+        updateContactIP(json.getLong(Friend.ID), json.getString(Friend.IP))
 
-    public fun updateContactHash(json: JSONObject){
-        val id = json.getInt(Friend.ID)
-        val hash = json.getString(Friend.HASH)
-        context.contentResolver.update(
-            Uri.withAppendedPath(CONTACTS_URI, id.toString()),
-            contentValuesOf(Pair(Friend.HASH, hash)), null, null)
+    public fun updateContactHash(json: JSONObject) {
+        val id = json.getLong(Friend.ID)
+        val hash = json.getInt(Friend.HASH)
+        updateContactHash(id, hash)
     }
+
+    public fun updateContactHash(id: Long, hash: Int) = context.contentResolver.also{it.update(
+            Uri.withAppendedPath(CONTACTS_URI, id.toString()),
+            contentValuesOf(Pair(Friend.HASH, hash)), null, null)}
+        .insert(HASH_LIST_URI,
+            contentValuesOf(Pair(Friend.HASH, hash), Pair(DbStructure.F_CONTACT_ID, id)))
+
 
     private fun calculateHash(): Int {
         var cursor = context.contentResolver.query(
@@ -97,9 +119,15 @@ class Contacts(context: Context) {
     }
 
     public fun updateIP(): String {
-        return ""
+        var ip = getIPAddress()
+        if (getIP() != ip) updateContactIP(1, ip)
+        return ip
     }
-    private fun updateHash(contactId:Int) = if (contactId > 5) hash else hash = calculateHash()
+
+    private fun updateHash(contactId:Long) = if (contactId > 5) hash else {
+            hash = calculateHash()
+            updateContactHash(1, hash)
+        }
 
     private fun cursorToContack(cursor: Cursor): Array<Friend>? {
         var res : Array<Friend>? = null
@@ -115,10 +143,36 @@ class Contacts(context: Context) {
                     cursor.getString(cursor.getColumnIndex(Friend.AVATAR)),
                     Friend.Status.valueOf(cursor.getString(cursor.getColumnIndex(Friend.STATUS))),
                     cursor.getInt(cursor.getColumnIndex(Friend.HASH)),
-                    cursor.getInt(cursor.getColumnIndex(Friend.ID))
+                    cursor.getLong(cursor.getColumnIndex(Friend.ID))
                 )
             } while (cursor.moveToNext())
         }
         return res
+    }
+
+    fun getIPAddress(): String {
+        try {
+            val interfaces: List<NetworkInterface> =
+                Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (intf in interfaces) {
+                val addrs: List<InetAddress> = Collections.list(intf.getInetAddresses())
+                for (addr in addrs) {
+                    if (!addr.isLoopbackAddress() ) {
+                        val sAddr: String = addr.getHostAddress()
+                        if (addr is Inet4Address) {
+                            return sAddr
+                        } else {
+                            if (addr is Inet6Address) {
+                                val delim = sAddr.indexOf('%') // drop ip6 port suffix
+                                return if (delim < 0) sAddr else sAddr.substring(0, delim)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 }

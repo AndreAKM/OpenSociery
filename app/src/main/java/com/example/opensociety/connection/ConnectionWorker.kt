@@ -1,5 +1,6 @@
 package com.example.opensociety.connection
 
+import android.content.Context
 import android.util.Log
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
@@ -8,9 +9,10 @@ import org.json.JSONObject
 import java.io.*
 import java.net.Socket
 
-class ConnectionWorker(socket: Socket): Runnable {
+class ConnectionWorker(socket: Socket, context: Context): Runnable {
     private val TAG = "ConnectionWorker"
     private val socket = socket
+    private val context = context
     companion object {
         const val COMMAND = "command"
         const val ACCESS_REQUEST = "access_request"
@@ -44,7 +46,7 @@ class ConnectionWorker(socket: Socket): Runnable {
             e.message?.let { Log.e(TAG, it) }
         }
     }
-    var contacts = Contacts()
+    var contacts = Contacts(context)
     var message = Message()
     fun inputProcess(data: String): String {
         val json = JSONObject(data)
@@ -53,14 +55,14 @@ class ConnectionWorker(socket: Socket): Runnable {
             ACCESS_REQUEST -> contacts.add_friend(json.getJSONObject(DATA),
                 Friend.Status.APPLIED.ordinal)
             ACCESS_ANSWER -> contacts.add_friend(json)
-            MESSAGE -> message.JSONtoMessage(json.getJSONObject(DATA))
+            MESSAGE -> message.JsonToMessage(json.getJSONObject(DATA))
             HASH -> contacts.updateContactHash(json.getJSONObject(DATA))
             IP -> contacts.updateContactIP(json.getJSONObject(DATA))
             GET_CONTATS -> result = contacts.get_contacts(json.getJSONObject(DATA)).toString()
             GET_HASH -> {
                 var rj = JSONObject()
                 rj.put(COMMAND, HASH)
-                rj.put(DATA, JSONObject().put(HASH,contacts.getHash())
+                rj.put(DATA, JSONObject().put(HASH,contacts.hash)
                     .put(IP, contacts.getIP()))
                 result = rj.toString()
             }

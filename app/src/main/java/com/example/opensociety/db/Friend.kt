@@ -7,7 +7,7 @@ import org.json.JSONObject
 class Friend(ip: String = "", nick: String = "",
              first_name: String = "", second_name: String = "",
              family_name: String = "", avatar: String = "",
-             status: Status = Status.APPLIED, hash:Int, id: Int? ) {
+             status: Status = Status.APPLIED, hash:Int, id: Long? ) {
 
     var id = id
     var ip = ip
@@ -59,7 +59,7 @@ class Friend(ip: String = "", nick: String = "",
         jsonObject.getString(FAMILY_NAME), jsonObject.getString(AVATAR), status,
         jsonObject.getInt(HASH),null) {
         if (jsonObject.has(ID)) {
-            id = jsonObject.getInt(ID)
+            id = jsonObject.getLong(ID)
         }
     }
 
