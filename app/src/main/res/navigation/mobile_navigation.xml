@@ -18,8 +18,8 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.opensociety.ui.notifications.NotificationsFragment"
+        android:id="@+id/navigation_contacts"
+        android:name="com.example.opensociety.ui.contacts.ContactsFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_contacs" />
 </navigation>

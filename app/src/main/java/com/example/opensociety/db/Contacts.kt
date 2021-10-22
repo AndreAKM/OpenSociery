@@ -4,6 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import org.json.JSONObject
 import java.lang.Exception
@@ -14,8 +15,14 @@ import java.net.NetworkInterface
 import java.util.*
 
 class Contacts(context: Context) {
+    val TAG = "Contacts"
     val context = context
     var hash = calculateHash()
+
+    init {
+        updateIP()
+        Log.d(TAG, "IP: " + getIP())
+    }
     companion object {
         val CONTACTS_URI: Uri =
             Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_CONTACTS)
@@ -108,33 +115,30 @@ class Contacts(context: Context) {
         return cursor?.let {
             var accum = ""
             if (cursor.moveToFirst()) {
+
                 do {
-                    accum += it.getString(it.getColumnIndex(Friend.NICK)) +
-                            it.getString(it.getColumnIndex(Friend.FIRST_NAME)) +
-                            it.getString(it.getColumnIndex(Friend.SECOND_NAME)) +
-                            it.getString(it.getColumnIndex(Friend.FAMILY_NAME))
+                    for(i in 0 until it.columnCount) {
+                        accum += it.getString(i)
+                    }
                 } while (it.moveToNext())
             }
             accum.hashCode()
         } ?: 0
     }
 
-    public fun getIP(): String {
+    public fun getIP(): String? {
         var cursor = context.contentResolver.query(
             Uri.withAppendedPath(CONTACTS_URI, "1"),
             arrayOf(Friend.IP), null, null, null)
         return cursor?.let {
-            if (cursor.moveToFirst()) {
-                it.getString(it.getColumnIndex(Friend.IP))
-            } else {
-                updateIP()
-            }
-        } ?: updateIP()
+            it.takeIf{it.moveToFirst()}?. getString(it.getColumnIndex(Friend.IP))
+        }
     }
 
     public fun updateIP(): String {
         var ip = getIPAddress()
-        if (getIP() != ip) updateContactIP(1, ip)
+        if (getIP() != ip) Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
+        Log.d(TAG, "updateIP()->" + ip);
         return ip
     }
 
@@ -164,7 +168,7 @@ class Contacts(context: Context) {
         return res
     }
 
-    fun getIPAddress(): String {
+    fun getIPAddress(isIP4: Boolean = true): String {
         try {
             val interfaces: List<NetworkInterface> =
                 Collections.list(NetworkInterface.getNetworkInterfaces())
@@ -173,10 +177,11 @@ class Contacts(context: Context) {
                 for (addr in addrs) {
                     if (!addr.isLoopbackAddress() ) {
                         val sAddr: String = addr.getHostAddress()
-                        if (addr is Inet4Address) {
-                            return sAddr
-                        } else {
-                            if (addr is Inet6Address) {
+                        when(isIP4) {
+                            true -> if (addr is Inet4Address) {
+                                return sAddr
+                            }
+                            false -> if (addr is Inet6Address) {
                                 val delim = sAddr.indexOf('%') // drop ip6 port suffix
                                 return if (delim < 0) sAddr else sAddr.substring(0, delim)
                             }

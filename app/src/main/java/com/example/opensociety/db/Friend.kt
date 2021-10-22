@@ -39,6 +39,16 @@ class Friend(ip: String = "", nick: String = "",
                 7 -> SUBSCRIPTION
                 else -> UNKNOWN
             }
+            fun stringToStatus(name: String) = when (name) {
+                "APPLIED" -> APPLIED
+                "CLOSED" -> CLOSED
+                "FRIEND" -> FRIEND
+                "VIEWER" -> VIEWER
+                "DUPLICATE" -> DUPLICATE
+                "REMOUTE" -> REMOUTE
+                "SUBSCRIPTION" -> SUBSCRIPTION
+                else -> UNKNOWN
+            }
         }
     }
 
@@ -88,4 +98,15 @@ class Friend(ip: String = "", nick: String = "",
         if(id != null) { r.put(ID,id) }
         return r
     }
+
+    public fun getJson() = JSONObject()
+            .put(IP, ip)
+            .put(NICK, nick)
+            .put(FIRST_NAME, first_name)
+            .put(SECOND_NAME,second_name)
+            .put(FAMILY_NAME, family_name)
+            .put(AVATAR, avatar)
+            .put(STATUS, status)
+            .put(HASH, hash)
+
 }
