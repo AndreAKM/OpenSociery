@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.opensociety.databinding.FragmentContacsBinding
 
 class ContactsFragment : Fragment() {
@@ -30,10 +32,12 @@ class ContactsFragment : Fragment() {
         _binding = FragmentContacsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.ownContactInfo
-        contactsViewModel.text.observe(viewLifecycleOwner, Observer {
+        //val textView: TextView = binding.ownContactInfo
+        var contactsList: RecyclerView = binding.contactsList
+        contactsList.layoutManager = LinearLayoutManager(context)
+        /*contactsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
-        })
+        })*/
         return root
     }
 

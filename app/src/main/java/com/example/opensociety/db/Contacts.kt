@@ -168,6 +168,15 @@ class Contacts(context: Context) {
         return res
     }
 
+    fun contactsList(): Array<Friend> {
+        var cursor = context.contentResolver?.query(
+            CONTACTS_URI, null, null, null, Friend.STATUS +
+                Friend.NICK + ", " + Friend.FAMILY_NAME + ", " + Friend.SECOND_NAME + ", " +
+                Friend.FAMILY_NAME
+        )
+        return cursor?.let { cursorToContack(it) } ?: emptyArray()
+    }
+
     fun getIPAddress(isIP4: Boolean = true): String {
         try {
             val interfaces: List<NetworkInterface> =

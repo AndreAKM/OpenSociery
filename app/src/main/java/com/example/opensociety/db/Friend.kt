@@ -24,9 +24,10 @@ class Friend(ip: String = "", nick: String = "",
         CLOSED,     // The contacts are not allowed to look at our activity
         FRIEND,     // The contacts have the whole access to our date
         VIEWER,     // The contacts see only our publications
-        DUPLICATE,  // New contacts which have the same names. Possible it is a reconnection
         REMOUTE,    // There are some publication by the contacts were met
         SUBSCRIPTION,// We collect only publications by the contacts
+        STEP_FRIEND, // It is friend of my friend
+        DUPLICATE,  // New contacts which have the same names. Possible it is a reconnection
         UNKNOWN;    // We know only hash the other information is being looked for.
         companion object {
             fun intToStatus(value: Int) = when (value) {
@@ -34,9 +35,10 @@ class Friend(ip: String = "", nick: String = "",
                 2 -> CLOSED
                 3 -> FRIEND
                 4 -> VIEWER
-                5 -> DUPLICATE
-                6 -> REMOUTE
-                7 -> SUBSCRIPTION
+                5 -> REMOUTE
+                6 -> SUBSCRIPTION
+                7 -> STEP_FRIEND
+                8 -> DUPLICATE
                 else -> UNKNOWN
             }
             fun stringToStatus(name: String) = when (name) {
