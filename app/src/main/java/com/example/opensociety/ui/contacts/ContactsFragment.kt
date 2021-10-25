@@ -35,6 +35,7 @@ class ContactsFragment : Fragment() {
         //val textView: TextView = binding.ownContactInfo
         var contactsList: RecyclerView = binding.contactsList
         contactsList.layoutManager = LinearLayoutManager(context)
+        contactsList.adapter = context?.let { ContactsListAdapter(it) }
         /*contactsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })*/
