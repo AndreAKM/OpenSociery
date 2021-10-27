@@ -18,8 +18,31 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/navigation_contacts"
+        android:id="@+id/navigation_contacts_list"
         android:name="com.example.opensociety.ui.contacts.ContactsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_contacs" />
+        android:label="@string/title_contacts_list"
+        tools:layout="@layout/fragment_contacs_list" >
+        <action
+            android:id="@+id/action_navigation_contacts_list_to_navigation_contact_data"
+            app:destination="@id/navigation_contact_data"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_contact_data"
+        android:name="com.example.opensociety.ui.contacts.ContactData"
+        android:label="@string/title_contacts_list"
+        tools:layout="@layout/contact_data_fragment" >
+        <argument
+            android:name="@string/contact_data"
+            app:argType="string"
+            android:defaultValue="null" />
+        <argument
+            android:name="@string/contact_id"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 </navigation>

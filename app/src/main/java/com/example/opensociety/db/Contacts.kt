@@ -88,6 +88,13 @@ class Contacts(context: Context) {
         }.insert(IP_LIST_URI,
             contentValuesOf(Pair(Friend.IP, ip), Pair(DbStructure.F_CONTACT_ID, id)))
 
+    public fun updateContact(friend:Friend) =
+        context.contentResolver. also {
+            it.update(
+                Uri.withAppendedPath(CONTACTS_URI, friend.id.toString()),
+                friend.getContentValues(), null, null)
+        }
+
     public fun updateContactIP(json: JSONObject) =
         updateContactIP(json.getLong(Friend.ID), json.getString(Friend.IP))
 

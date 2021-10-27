@@ -2,6 +2,19 @@
     <string name="app_name">OpenSociety</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Contacts</string>
+    <string name="title_contacts_list">Contacts</string>
+    <string name="title_account">Account</string>
 
+    <string name="Save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit">Edit</string>
+
+    <string name="contact_data">contact_data</string>
+    <string name="contact_id">contact_id</string>
+
+    <string name="nickname">Nickname:</string>
+    <string name="first_name">First Name:</string>
+    <string name="second_name">Second Name:</string>
+    <string name="family_name">Family Name:</string>
+    <string name="status">Status:</string>
 </resources>
