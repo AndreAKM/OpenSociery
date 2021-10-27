@@ -51,14 +51,14 @@ class DbStructure(context: Context):
                     F_IP + DEFAULT_TEXT + ", " + F_NICK_NAME + DEFAULT_TEXT + ", " +
                     F_FIRST_NAME + DEFAULT_TEXT + ", " + F_SECOND_NAME + DEFAULT_TEXT +", " +
                     F_FAMILY_NAME + DEFAULT_TEXT + ", " + F_AVATAR + DEFAULT_TEXT +", " + F_HASH +
-                    " INTEGER DEFAULT 0 NOT NULL UNIQUE," +
+                    " INTEGER DEFAULT 0 NOT NULL," +
                     F_STATUS + " TEXT DEFAULT \"UNKNOWN\" NOT NULL);")
             db.execSQL("CREATE TABLE " + TB_IP_LIST + "( " + F_ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_IP + DEFAULT_TEXT + ", " +
                     F_CONTACT_ID + DEFAULT_INT + ", UNIQUE (" + F_IP  + ", " + F_CONTACT_ID + "));");
             db.execSQL("CREATE TABLE " + TB_HASH_LIST + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_HASH + DEFAULT_TEXT + ", " +
-                    F_CONTACT_ID + DEFAULT_INT + ", UNIQUE (" + F_HASH  + ", " +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_HASH + " INTEGER NOT NULL" + ", " +
+                    F_CONTACT_ID + " INTEGER NOT NULL" + ", UNIQUE (" + F_HASH  + ", " +
                     F_CONTACT_ID + "));");
             db.execSQL("CREATE TABLE " + TB_NEWS + "( " + F_ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_MESSAGE_ID + " INTEGER);");

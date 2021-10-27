@@ -8,8 +8,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.opensociety.R
 import com.example.opensociety.databinding.FragmentContacsListBinding
 
 class ContactsFragment : Fragment() {
@@ -35,7 +38,10 @@ class ContactsFragment : Fragment() {
                 ViewModelProvider(this).get(ContactsViewModel::class.java)
 
         _binding = FragmentContacsListBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val root: View = _binding!!.root
+        _binding!!.addContact.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_navigation_contacts_list_to_navigation_contact_data) }
 
         //val textView: TextView = binding.ownContactInfo
         var contactsList: RecyclerView = binding.contactsList

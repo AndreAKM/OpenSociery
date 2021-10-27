@@ -23,22 +23,35 @@ class DBContentProvider : ContentProvider() {
         val MESSAGES = 7
         val VIEWERS = 9
         val IP_LIST = 10
+        val HASH_LIST = 12
+
         val CONTACTS_ID = 1 + 1
         val NEWS_ID = 3 + 1
         val CHATS_LIST_ID = 5 + 1
         val MESSAGES_ID = 7 + 1
         val VIEWERS_ID = 9 + 1
         val IP_LIST_ID = 10 + 1
+        val HASH_LIST_ID = HASH_LIST +1
     }
     init {
+        /*val TB_CONTACTS = "contacts"
+        val TB_IP_LIST = "ip_list"
+        val TB_HASH_LIST = "hash_list"
+        val TB_NEWS = "news"
+        val TB_CHATS_LIST = "chats_list"
+        val TB_MESSAGES = "messages"
+        val TB_VIEWERS = "viewers"*/
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_CONTACTS, CONTACTS)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_IP_LIST, IP_LIST)
+        uriMatcher.addURI(AUTHORITIES, DbStructure.TB_HASH_LIST, HASH_LIST)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_NEWS, NEWS)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_CHATS_LIST, CHATS_LIST)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_MESSAGES, MESSAGES)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_VIEWERS, VIEWERS)
+
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_CONTACTS + "/#", CONTACTS_ID)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_IP_LIST + "/#", IP_LIST_ID)
+        uriMatcher.addURI(AUTHORITIES, DbStructure.TB_HASH_LIST + "/#", HASH_LIST_ID)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_NEWS + "/#", NEWS_ID)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_CHATS_LIST + "/#", CHATS_LIST_ID)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_MESSAGES + "/#", MESSAGES_ID)
@@ -58,6 +71,7 @@ class DBContentProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
+        Log.d(TAG, "insert(${uri.toString()}, ${values.toString()})")
         val id = dbHelper?.writableDatabase?.insert(UriToTbName(uri), null, values)
             ?: -1
         if (id == -1L) {
@@ -113,6 +127,7 @@ class DBContentProvider : ContentProvider() {
         when(uriMatcher.match(uri)) {
             CONTACTS, CONTACTS_ID -> return DbStructure.TB_CONTACTS
             IP_LIST, IP_LIST_ID -> return DbStructure.TB_IP_LIST
+            HASH_LIST, HASH_LIST_ID -> return DbStructure.TB_HASH_LIST
             NEWS, NEWS_ID -> return DbStructure.TB_NEWS
             CHATS_LIST, CHATS_LIST_ID -> return DbStructure.TB_CHATS_LIST
             MESSAGES, MESSAGES_ID -> return DbStructure.TB_MESSAGES

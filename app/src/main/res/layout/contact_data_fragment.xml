@@ -63,6 +63,8 @@
             android:id="@+id/firs_name"
             android:layout_gravity="right"
             android:inputType="none"
+            android:clickable="false"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -79,6 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="none"
+            android:clickable="false"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:layout_gravity="right"/>
 
@@ -95,6 +98,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="none"
+            android:clickable="false"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_gravity="right"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_gravity="left"
+            android:textStyle="bold"
+            android:text="IP"/>
+
+        <EditText
+            android:id="@+id/IP"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:clickable="false"
+            android:digits="0123456789."
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:layout_gravity="right"/>
 

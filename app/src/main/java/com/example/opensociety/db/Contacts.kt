@@ -93,6 +93,7 @@ class Contacts(context: Context) {
             it.update(
                 Uri.withAppendedPath(CONTACTS_URI, friend.id.toString()),
                 friend.getContentValues(), null, null)
+            updateHash(friend.id!!)
         }
 
     public fun updateContactIP(json: JSONObject) =
@@ -107,8 +108,12 @@ class Contacts(context: Context) {
     public fun updateContactHash(id: Long, hash: Int) = context.contentResolver.also{it.update(
             Uri.withAppendedPath(CONTACTS_URI, id.toString()),
             contentValuesOf(Pair(Friend.HASH, hash)), null, null)}
-        .insert(HASH_LIST_URI,
-            contentValuesOf(Pair(Friend.HASH, hash), Pair(DbStructure.F_CONTACT_ID, id)))
+        .let{ Log.d(TAG, "insert ( ${Friend.HASH}: $hash, ${DbStructure.F_CONTACT_ID}: $id)")
+            it.insert(
+                HASH_LIST_URI,
+                contentValuesOf(Pair(Friend.HASH, hash), Pair(DbStructure.F_CONTACT_ID, id))
+            )
+        }
 
 
     private fun calculateHash(): Int {

@@ -88,6 +88,7 @@ class ContactData : Fragment() {
             _binding.firsName.setText(friend!!.first_name)
             _binding.secondName.setText(friend!!.second_name)
             _binding.familyName.setText(friend!!.family_name)
+            _binding.IP.setText(friend!!.ip)
             _binding.status.setSelection(friend!!.status.ordinal)
         }
         _binding.status.isEnabled = false;
