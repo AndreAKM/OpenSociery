@@ -42,12 +42,8 @@ class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<Contac
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.largeTextView?.text = when {
-            contacts[position].nick.isNotEmpty() -> contacts[position].nick
-            contacts[position].family_name.isNotEmpty() -> contacts[position].family_name
-            contacts[position].family_name.isNotEmpty() -> contacts[position].family_name
-            else -> ""
-        }
+        holder.largeTextView?.text = contacts[position].getTitle()
+
         holder.smallTextView?.text = contacts[position].status.toString() +
                 "\n" + contacts[position].ip
         holder.itemView.setOnClickListener{
@@ -58,13 +54,6 @@ class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<Contac
             Log.d(TAG, "bundle: $bundle")
             holder.itemView.findNavController().navigate(
                 R.id.action_navigation_contacts_list_to_navigation_contact_data, bundle)
-            /*{view->
-                    Log.d(TAG, "click Item: " + position)
-                    view.findNavController().navigate(R.id.action_editing_contact_data)
-                   context.supportFragmentManager.beginTransaction().also {
-                        it.add(R.id.fragment_container_view_tag, ContactData.newInstance(position+1))
-                    }.commit()
-                }*/
         }
     }
 

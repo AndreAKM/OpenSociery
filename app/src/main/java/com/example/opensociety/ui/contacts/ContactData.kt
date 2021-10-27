@@ -60,15 +60,21 @@ class ContactData : Fragment() {
         val arg =arguments
         Log.d(TAG, "onCreateView($savedInstanceState) {friend: $arg}")
         id = arg!!.getInt(CONTACT_ID, -1)
-        if (id == -1) {
-            friend = arg!!.getString(CONTACT_DATA)?.
-            let {Friend(JSONObject(it))} ?:
-                    Friend()
-        }
-        else {
-            friend = context?.let {
+        when {
+            id == -1 && arg != null -> {
+                friend = arg!!.getString(CONTACT_DATA)?.let {
+                    Friend(JSONObject(it))
+                } ?: Friend()
+            }
+
+            id != -1 -> friend = context?.let {
                 Contacts(it).find_contact(JSONObject().put(Friend.ID, id))?.run{this[0]}
             } ?: null
+
+            else -> Friend()
+        }
+        if (id == -1) {
+
         }
         Log.d(TAG, "friend: $friend")
         _binding = ContactDataFragmentBinding.inflate(inflater, container, false)
@@ -78,7 +84,7 @@ class ContactData : Fragment() {
                 android.R.layout.simple_spinner_item, Friend.Status.names())
         }
         if (friend != null) {
-            _binding.title.setText(friend!!.getName())
+            _binding.title.setText(friend!!.getTitle())
             _binding.firsName.setText(friend!!.first_name)
             _binding.secondName.setText(friend!!.second_name)
             _binding.familyName.setText(friend!!.family_name)
@@ -100,8 +106,12 @@ class ContactData : Fragment() {
         _binding.nickname.visibility = View.VISIBLE
         _binding.nickname.setText(friend!!.nick)
         _binding.firsName.inputType = InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+        _binding.firsName.isClickable = true
         _binding.secondName.inputType = InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+        _binding.secondName.isClickable = true
         _binding.familyName.inputType = InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+        _binding.familyName.isClickable = true
+        _binding.IP.isClickable = true
         _binding.btnCancel.visibility = View.VISIBLE
         _binding.btnYes.visibility = View.VISIBLE
         _binding.btnEdit.visibility = View.INVISIBLE
@@ -115,6 +125,7 @@ class ContactData : Fragment() {
         friend!!.second_name = _binding.secondName.text.toString()
         friend!!.family_name = _binding.familyName.text.toString()
         friend!!.status = Friend.Status.intToStatus(_binding.status.selectedItemId.toInt())
+        friend!!.ip = _binding.IP.text.toString()
         Log.d(TAG,"Save friend: ${friend!!.getJson()}")
         friend!!.id?. takeIf {it > 0}?. let { contacts!!.updateContact(friend!!) } ?:
             contacts!!.add_friend(friend!!)

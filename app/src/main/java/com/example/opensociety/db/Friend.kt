@@ -70,7 +70,7 @@ class Friend(ip: String = "", nick: String = "",
         jsonObject.getString(AVATAR), Status.valueOf(jsonObject.getString(STATUS)),
         jsonObject.getLong(HASH), jsonObject.getLong(ID)) {}
 
-    public fun getName() = when {
+    public fun getTitle() = when {
         nick.isNotEmpty() -> nick
         first_name.isNotEmpty() -> first_name
         family_name.isNotEmpty() -> family_name
