@@ -17,27 +17,39 @@ class Server(context: Context) {
     private val context = context
     private var serverSoket: ServerSocket? = null
 
+    private var mainThread = MainThread()
     private var callableDelay = CallableDelay()
     private var callableServer = CallableServer(SERVER_PORT)
 
-    private var futureTask = arrayOf(FutureTask<String>(callableDelay), FutureTask<String>(callableServer))
+    private var futureTask = arrayOf(FutureTask<String>(callableDelay),
+        FutureTask<String>(callableServer), FutureTask<String>(mainThread)
+    )
 
-    private var executor = Executors.newFixedThreadPool(2)
-
+    private var executor = Executors.newFixedThreadPool(3)
     init {
-        while (true) {
-            if (isTasksDone()) {
-                // Завершение работы executor'а
-                executor.shutdown();
-                System.out.println("\nexecutor shutdown");
-                break;
-            }
-        }
+        executor.submit(futureTask[2])
+        executor.submit(futureTask[0])
+        executor.submit(futureTask[1])
     }
+    inner class MainThread: Callable<String> {
 
-    private fun isTasksDone(): Boolean {
-        return futureTask[0].isDone &&
-                futureTask[1].isDone
+
+        private fun isTasksDone(): Boolean {
+            return futureTask[0].isDone &&
+                    futureTask[1].isDone
+        }
+
+        override fun call(): String {
+            while (true) {
+                if (isTasksDone()) {
+                    Log.d(TAG, "Завершение работы executor'а")
+                    executor.shutdown();
+                    Log.d(TAG, "\nexecutor shutdown");
+                    break;
+                }
+            }
+            return "" + Thread.currentThread().name
+        }
     }
     inner class CallableServer(port: Int) : Callable<String> {
         var started = true
@@ -50,7 +62,7 @@ class Server(context: Context) {
             while (started) {
                 var worker: ConnectionWorker? = null
                 try {
-                    // Ожидание соединения с клиентом
+                    Log.d(TAG, "Ожидание соединения с клиентом")
                     worker = serverSoket?.let {ConnectionWorker(it.accept(), context)} ?: null
 
                     /*
@@ -60,10 +72,8 @@ class Server(context: Context) {
                     val t: Thread = Thread(worker)
                     t.start()
                 } catch (e: Exception) {
-                    System.err.println(
-                        "Connection error : "
-                                + e.message
-                    )
+                    Log.d(TAG, "Connection error : ${e.message}")
+
                     // Завершение цикла.
                     if (serverSoket!!.isClosed) break
                 }

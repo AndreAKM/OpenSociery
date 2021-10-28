@@ -5,7 +5,6 @@ import android.util.Log
 import com.example.opensociety.db.ChatManager
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
-import com.example.opensociety.db.Message
 import org.json.JSONObject
 import java.io.*
 import java.net.Socket
@@ -17,7 +16,7 @@ class ConnectionWorker(socket: Socket, context: Context): Runnable {
     companion object {
         const val COMMAND = "command"
         const val ACCESS_REQUEST = "access_request"
-        const val ACCESS_ANSWER = "access_answer"
+        const val CHANGE_ACCESS_STATUS = "access_answer"
         const val MESSAGE = "message"
         const val HASH = "hash"
         const val IP = "ip"
@@ -28,19 +27,22 @@ class ConnectionWorker(socket: Socket, context: Context): Runnable {
     }
     override fun run() {
         try {
-            var inStream = DataInputStream(socket.getInputStream())
-            var outStream = DataOutputStream(socket.getOutputStream())
+            var reader = BufferedReader(InputStreamReader(socket.getInputStream()))
+            val writer = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())),
+                true)
             while (!socket.isClosed) {
                 Log.d(TAG, "ConnectionWorker start")
-                val entry = inStream.readUTF()
+                val entry = reader.readLine()
+                Log.d(TAG, "ConnectionWorker gets $entry")
                 val outData = inputProcess(entry)
-                if (outData.length != 0) {
-                    outStream.writeUTF(outData)
-                    outStream.flush()
-                } else {
-                    socket.close()
-                    outStream.flush()
+                Log.d(TAG, "ConnectionWorker outData: $outData")
+                if (outData.isNotEmpty()) {
+                    Log.d(TAG, "ConnectionWorker outData: $outData")
+                    writer.write(outData)
+                    writer.flush()
                 }
+                Log.d(TAG, "ConnectionWorker outData: $outData")
+                socket.close()
             }
             Log.d(TAG, "ConnectionWorker stoped")
         } catch (e:IOException) {
@@ -51,11 +53,12 @@ class ConnectionWorker(socket: Socket, context: Context): Runnable {
     var chat_m = ChatManager(context)
     fun inputProcess(data: String): String {
         val json = JSONObject(data)
+        Log.d(TAG, "iputProces($data)")
         var result = ""
         when (json.getString(COMMAND)) {
             ACCESS_REQUEST -> contacts.add_friend(json.getJSONObject(DATA),
                 Friend.Status.APPLIED.ordinal)
-            ACCESS_ANSWER -> contacts.add_friend(json)
+            CHANGE_ACCESS_STATUS -> contacts.add_friend(json)
             MESSAGE -> chat_m.registrationInputMessage(json)
             HASH -> contacts.updateContactHash(json.getJSONObject(DATA))
             IP -> contacts.updateContactIP(json.getJSONObject(DATA))

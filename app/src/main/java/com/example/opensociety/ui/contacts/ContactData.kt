@@ -10,10 +10,13 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.navigation.fragment.findNavController
 import com.example.opensociety.R
+import com.example.opensociety.connection.CommandFactory
+import com.example.opensociety.connection.Connection
 import com.example.opensociety.databinding.ContactDataFragmentBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
 import org.json.JSONObject
+import kotlin.concurrent.thread
 
 class ContactData : Fragment() {
     val TAG = "ContactData"
@@ -125,7 +128,17 @@ class ContactData : Fragment() {
         friend!!.first_name = _binding.firsName.text.toString()
         friend!!.second_name = _binding.secondName.text.toString()
         friend!!.family_name = _binding.familyName.text.toString()
-        friend!!.status = Friend.Status.intToStatus(_binding.status.selectedItemId.toInt())
+        val newStatus = Friend.Status.intToStatus(_binding.status.selectedItemId.toInt())
+        if (newStatus != friend!!.status && 1L != friend!!.id) {
+            friend!!.status = newStatus
+            thread {
+                val command =
+                    CommandFactory.makeAskingAccess(friend!!, contacts!!.get_contact(1L)!!)
+                var connection = Connection(friend!!.ip)
+                connection.openConnection()
+                connection.sendData(command.toString())
+            }
+        }
         friend!!.ip = _binding.IP.text.toString()
         Log.d(TAG,"Save friend: ${friend!!.getJson()}")
         friend!!.id?. takeIf {it > 0}?. let { contacts!!.updateContact(friend!!) } ?:

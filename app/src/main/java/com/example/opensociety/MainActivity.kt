@@ -8,6 +8,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.opensociety.databinding.ActivityMainBinding
+import android.content.Intent
+import com.example.opensociety.connection.FoneClientService
+import android.os.Build
+
+
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +35,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_contacts_list))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        val intentService = Intent(this, FoneClientService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intentService)
+        } else {
+            startService(intentService)
+        }
     }
 
     override fun onSupportNavigateUp()

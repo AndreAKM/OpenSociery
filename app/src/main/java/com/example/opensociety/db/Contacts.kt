@@ -58,6 +58,13 @@ class Contacts(context: Context) {
         return result
     }
 
+    public  fun get_contact(id:Long): Friend? {
+        var cursor = context.contentResolver.query(
+            Uri.withAppendedPath(CONTACTS_URI, "1"),
+            null, null, null, null)
+        return cursor?.let { cursorToContack(it) } ?: null
+    }
+
     public fun find_contact(json: JSONObject): Array<Friend>? {
         var select = ""
         var selectArgs = emptyArray<String>()
@@ -70,7 +77,7 @@ class Contacts(context: Context) {
             Friend.NICK + ", " + Friend.FAMILY_NAME + ", " + Friend.SECOND_NAME + ", " +
                 Friend.FAMILY_NAME
         )
-        return cursor?.let { cursorToContack(it) } ?: null
+        return cursor?.let { cursorToContacksArray(it) } ?: null
     }
 
     fun contactID(contact_hash:Long):Long? {
@@ -158,8 +165,21 @@ class Contacts(context: Context) {
             hash = calculateHash()
             updateContactHash(1, hash)
         }
+    private fun cursorToContack(cursor: Cursor) = cursor.takeIf { it.moveToFirst() }?. let {
+                Friend(
+                    cursor.getString(cursor.getColumnIndex(Friend.IP)),
+                    cursor.getString(cursor.getColumnIndex(Friend.NICK)),
+                    cursor.getString(cursor.getColumnIndex(Friend.FIRST_NAME)),
+                    cursor.getString(cursor.getColumnIndex(Friend.SECOND_NAME)),
+                    cursor.getString(cursor.getColumnIndex(Friend.FAMILY_NAME)),
+                    cursor.getString(cursor.getColumnIndex(Friend.AVATAR)),
+                    Friend.Status.valueOf(cursor.getString(cursor.getColumnIndex(Friend.STATUS))),
+                    cursor.getLong(cursor.getColumnIndex(Friend.HASH)),
+                    cursor.getLong(cursor.getColumnIndex(Friend.ID))
+                )
+        } ?: null
 
-    private fun cursorToContack(cursor: Cursor): Array<Friend>? {
+    private fun cursorToContacksArray(cursor: Cursor): Array<Friend>? {
         var res : Array<Friend>? = null
         if (cursor.moveToFirst()) {
             res = emptyArray()
@@ -186,7 +206,7 @@ class Contacts(context: Context) {
             Friend.STATUS + ", " + Friend.NICK + ", " + Friend.FAMILY_NAME + ", " +
                 Friend.SECOND_NAME + ", " + Friend.FAMILY_NAME
         )
-        return cursor?.let { cursorToContack(it) } ?: emptyArray()
+        return cursor?.let { cursorToContacksArray(it) } ?: emptyArray()
     }
 
     fun getIPAddress(isIP4: Boolean = true): String {
