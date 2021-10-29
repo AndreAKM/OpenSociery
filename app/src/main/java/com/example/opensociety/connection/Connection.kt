@@ -50,8 +50,7 @@ class Connection(host: String) {
         }
         try {
             val writer = PrintWriter(
-                BufferedWriter(OutputStreamWriter(socket!!.getOutputStream())),
-                true)
+                BufferedWriter(OutputStreamWriter(socket!!.getOutputStream())),true)
             Log.d(TAG, "writer.write($data)")
             writer.write(data)
             writer.flush()

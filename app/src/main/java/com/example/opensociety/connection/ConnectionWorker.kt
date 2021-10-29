@@ -9,7 +9,7 @@ import org.json.JSONObject
 import java.io.*
 import java.net.Socket
 
-class ConnectionWorker(socket: Socket, context: Context): Runnable {
+class ConnectionWorker(socket: Socket, context: Context) {
     private val TAG = "ConnectionWorker"
     private val socket = socket
     private val context = context
@@ -25,7 +25,8 @@ class ConnectionWorker(socket: Socket, context: Context): Runnable {
         const val GET_HASH = "get_hash"
         const val DATA = "data"
     }
-    override fun run() {
+
+    suspend fun run() {
         try {
             var reader = BufferedReader(InputStreamReader(socket.getInputStream()))
             val writer = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())),
