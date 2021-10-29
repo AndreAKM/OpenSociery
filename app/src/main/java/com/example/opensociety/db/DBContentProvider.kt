@@ -22,15 +22,15 @@ class DBContentProvider : ContentProvider() {
         val CHATS_LIST = 5
         val MESSAGES = 7
         val VIEWERS = 9
-        val IP_LIST = 10
-        val HASH_LIST = 12
+        val IP_LIST = 11
+        val HASH_LIST = 13
 
-        val CONTACTS_ID = 1 + 1
-        val NEWS_ID = 3 + 1
-        val CHATS_LIST_ID = 5 + 1
-        val MESSAGES_ID = 7 + 1
-        val VIEWERS_ID = 9 + 1
-        val IP_LIST_ID = 10 + 1
+        val CONTACTS_ID = CONTACTS + 1
+        val NEWS_ID = NEWS + 1
+        val CHATS_LIST_ID = CHATS_LIST + 1
+        val MESSAGES_ID = MESSAGES + 1
+        val VIEWERS_ID = VIEWERS + 1
+        val IP_LIST_ID = IP_LIST + 1
         val HASH_LIST_ID = HASH_LIST +1
     }
     init {

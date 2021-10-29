@@ -116,7 +116,10 @@ class Contacts(context: Context) {
             Uri.withAppendedPath(CONTACTS_URI, id.toString()),
             contentValuesOf(Pair(Friend.HASH, hash)), null, null)}
         .let{ Log.d(TAG, "insert ( ${Friend.HASH}: $hash, ${DbStructure.F_CONTACT_ID}: $id)")
-            it.insert(
+            var cursor = it.query(HASH_LIST_URI, null,
+                "${Friend.HASH} = ? AND ${DbStructure.F_CONTACT_ID} = ? ",
+                arrayOf(hash.toString(), id.toString()), null)
+            if (!(cursor != null && cursor.getCount() > 0) ) it.insert(
                 HASH_LIST_URI,
                 contentValuesOf(Pair(Friend.HASH, hash), Pair(DbStructure.F_CONTACT_ID, id))
             )

@@ -8,6 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.net.ServerSocket
@@ -76,7 +77,8 @@ class Server(context: Context) {
         server()
         GlobalScope.async {
             var status = statusActor()
-            while (getCurrentCount(status) != 0){}
+            while (getCurrentCount(status) != 0){
+                delay(100)}
         }.await()
     }
 
