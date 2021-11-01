@@ -8,8 +8,8 @@ android {
 
     defaultConfig {
         applicationId "com.example.opensociety"
-        minSdk 21
-        targetSdk 30
+        minSdk 28
+        targetSdk 28
         versionCode 1
         versionName "1.0"
 
