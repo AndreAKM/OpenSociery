@@ -32,9 +32,9 @@ class ConnectionWorker(socket: Socket, context: Context) {
             val writer = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())),
                 true)
             while (!socket.isClosed) {
-                Log.d(TAG, "ConnectionWorker start")
+                Log.d(TAG, "start")
                 val entry = reader.readLine()
-                Log.d(TAG, "ConnectionWorker gets $entry")
+                Log.d(TAG, "gets $entry")
                 val outData = inputProcess(entry)
                 Log.d(TAG, "ConnectionWorker outData: $outData")
                 if (outData.isNotEmpty()) {

@@ -3,9 +3,16 @@ package com.example.opensociety.db
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.core.content.contentValuesOf
+import com.example.opensociety.connection.CommandFactory
+import com.example.opensociety.connection.Connection
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.Exception
 import java.net.Inet4Address
@@ -19,10 +26,6 @@ class Contacts(context: Context) {
     val context = context
     var hash = calculateHash()
 
-    init {
-        updateIP()
-        Log.d(TAG, "IP: " + getIP())
-    }
     companion object {
         val CONTACTS_URI: Uri =
             Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_CONTACTS)
@@ -92,8 +95,13 @@ class Contacts(context: Context) {
             it.update(
                 Uri.withAppendedPath(CONTACTS_URI, id.toString()),
                 contentValuesOf(Pair(Friend.IP, ip)), null, null)
-        }.insert(IP_LIST_URI,
-            contentValuesOf(Pair(Friend.IP, ip), Pair(DbStructure.F_CONTACT_ID, id)))
+        }.let{ Log.d(TAG, "insert ( ${Friend.IP}: $ip, ${DbStructure.F_CONTACT_ID}: $id)")
+            var cursor = it.query(IP_LIST_URI, null,
+                "${Friend.IP} = ? AND ${DbStructure.F_CONTACT_ID} = ? ",
+                arrayOf(ip, id.toString()), null)
+            if (!(cursor != null && cursor.getCount() > 0) ) it.insert(IP_LIST_URI,
+                contentValuesOf(Pair(Friend.IP, ip), Pair(DbStructure.F_CONTACT_ID, id)))
+        }
 
     public fun updateContact(friend:Friend) =
         context.contentResolver. also {
@@ -104,7 +112,8 @@ class Contacts(context: Context) {
         }
 
     public fun updateContactIP(json: JSONObject) =
-        updateContactIP(json.getLong(Friend.ID), json.getString(Friend.IP))
+        find_contact(JSONObject().put(Friend.HASH,json.getLong(Friend.HASH)))?.
+            get(0)?.id?.let { updateContactIP(it, json.getString(Friend.IP)) }
 
     public fun updateContactHash(json: JSONObject) {
         val id = json.getLong(Friend.ID)
@@ -159,7 +168,30 @@ class Contacts(context: Context) {
 
     public fun updateIP(): String {
         var ip = getIPAddress()
-        if (getIP() != ip) Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
+        if (getIP() != ip) {
+            Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
+            var owner: Friend? = null
+            if (isNetworkAvailable(context)) for (c in contactsList()) {
+                if (c.id == 1L) {
+                    owner = c
+                    Log.d(TAG, "owner is ${owner.getJson()}")
+                }
+                else {
+                    Log.d(TAG, "Send Updated IP($owner.ip) to ${c.getTitle()}: $c.ip")
+                    GlobalScope.launch {
+                        val command =
+                            CommandFactory.makeChangeIp(c, owner!!)
+                        try {
+                            var connection = Connection(c!!.ip)
+                            connection.openConnection()
+                            connection.sendData(command.toString())
+                        } catch (e: Exception) {
+                            Log.e(TAG, "can not send $command to ${c.getTitle()}: $c.ip")
+                        }
+                    }
+                }
+            }
+        }
         Log.d(TAG, "updateIP()->" + ip);
         return ip
     }
@@ -203,11 +235,18 @@ class Contacts(context: Context) {
         return res
     }
 
-    fun contactsList(): Array<Friend> {
+    fun contactsAlphavitList(): Array<Friend> {
         var cursor = context.contentResolver?.query(
             CONTACTS_URI, null, null, null,
             Friend.STATUS + ", " + Friend.NICK + ", " + Friend.FAMILY_NAME + ", " +
                 Friend.SECOND_NAME + ", " + Friend.FAMILY_NAME
+        )
+        return cursor?.let { cursorToContacksArray(it) } ?: emptyArray()
+    }
+
+    fun contactsList(): Array<Friend> {
+        var cursor = context.contentResolver?.query(
+            CONTACTS_URI, null, null, null, Friend.ID
         )
         return cursor?.let { cursorToContacksArray(it) } ?: emptyArray()
     }
@@ -237,5 +276,41 @@ class Contacts(context: Context) {
             e.printStackTrace()
         }
         return ""
+    }
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val nw      = connectivityManager.activeNetwork ?: return false
+            val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
+            return when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    Log.d (TAG, "connect via TRANSPORT_WIFI")
+                    true
+                }
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    Log.d(TAG, "connect via TRANSPORT_CELLULAR")
+                    true
+                }
+                //for other device how are able to connect with Ethernet
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    Log.d(TAG, "connect via TRANSPORT_ETHERNET")
+                    true
+                }
+                //for check internet over Bluetooth
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> {
+                    Log.d(TAG, "connect via TRANSPORT_BLUETOOTH")
+                    true
+                }
+                else -> {
+                    Log.d(TAG, "the devise if offline")
+                    false
+                }
+            }
+        } else {
+            val nwInfo = connectivityManager.activeNetworkInfo ?: return false
+            return nwInfo.isConnected
+        }
     }
 }

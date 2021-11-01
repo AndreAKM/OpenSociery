@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
         val intentService = Intent(this, FoneClientService::class.java)
+        stopService(intentService)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intentService)
         } else {

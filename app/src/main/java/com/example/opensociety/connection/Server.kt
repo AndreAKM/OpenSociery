@@ -1,22 +1,13 @@
 package com.example.opensociety.connection
 
 import android.content.Context
-import android.provider.Settings
 import android.util.Log
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.net.ServerSocket
-import java.net.Socket
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.FutureTask
 
 class Server(context: Context) {
     private val TAG = "Server"
@@ -24,29 +15,72 @@ class Server(context: Context) {
     private val SERVER_PORT = 9876
 
     private val context = context
-    private var serverSoket: ServerSocket? = null
-
-    var started = true
+    var serverSoket: ServerSocket? = null
     val port = SERVER_PORT
 
     sealed class StatusMsg {
         object IncCounter : StatusMsg()
         object DisCounter : StatusMsg()
-        object Stopping : StatusMsg()
+        object Stopped : StatusMsg()
+        object Working : StatusMsg()
+        object GoToStop : StatusMsg()
+        object GoToWork : StatusMsg()
         class GetCounter(val response: SendChannel<Int>) : StatusMsg()
-        class GetWorkStatus(val response: SendChannel<Boolean>) : StatusMsg()
+        class GetWorkStatus(val response: Channel<Status>) : StatusMsg()
     }
 
-    fun statusActor() = GlobalScope.actor<StatusMsg> {
+    enum class Status {
+        WORKING,
+        STOPPED,
+        GOTOSTOP,
+        GOTOWORK;
+        companion object {
+            fun intToStatus(value: Int) = Status.values()[value]
+            fun names() = Status.values().map { it.name }
+        }
+    }
+
+    val actor = GlobalScope.actor<StatusMsg> {
         var counter = 0
-        var isWorking = true
+        var status = Status.STOPPED
         for (msg in channel) {
             when (msg) {
                 is StatusMsg.IncCounter -> counter++
                 is StatusMsg.DisCounter -> counter--
                 is StatusMsg.GetCounter -> msg.response.send(counter)
-                is StatusMsg.Stopping -> isWorking = false
-                is StatusMsg.GetWorkStatus -> msg.response.send(isWorking)
+
+                is StatusMsg.GoToStop -> {
+                    Log.d(TAG, "actor gets GoToStop")
+                    if(status == Status.WORKING) {
+                        status = Status.GOTOSTOP
+                        //Log.d(TAG, "joining to main thread")
+                        //mainThread!!.join()
+                        Log.d(TAG, "mainThread ste to null")
+                        mainThread = null
+                        if (serverSoket != null) {
+                            Log.d(TAG, "server socket is bound")
+                            serverSoket!!.close()
+                            serverSoket = null
+                        }
+                        Log.d(TAG, "stop: success stop main thread")
+                        status = Status.STOPPED
+                    }
+                }
+                is StatusMsg.GoToWork -> {
+                    Log.d(TAG, "actor gets GoToWork")
+                    if(status == Status.STOPPED) {
+                        status = Status.WORKING
+                        mainThread = GlobalScope.launch {
+                            Log.d(TAG, "main thread: started")
+                            server()
+                            Log.d(TAG, "main thread: going to stop waiting jobs")
+                            waitJobsEnd()
+                            Log.d(TAG, "main thread: stop")
+                        }
+                        Log.d(TAG, "start: main thread is started Status: $status")
+                    }
+                }
+                is StatusMsg.GetWorkStatus -> msg.response.send(status)
             }
         }
     }
@@ -59,60 +93,96 @@ class Server(context: Context) {
         return receive
     }
 
-    suspend fun getStatus(counter: SendChannel<StatusMsg>): Boolean {
-        val response = Channel<Boolean>()
+    suspend fun getStatus(counter: SendChannel<StatusMsg>): Status {
+        val response = Channel<Status>()
         counter.send(StatusMsg.GetWorkStatus(response))
         val receive = response.receive()
-        Log.d(TAG, "Status = $receive")
+        Log.d(TAG, "getStatus: $receive")
         return receive
     }
 
     protected suspend fun finalize() {
-        val status = statusActor()
-        status.send(StatusMsg.Stopping)
-        mainThread.join()
+        Log.d(TAG, "finalize")
+        stop()
     }
 
-    private var mainThread = GlobalScope.launch {
-        server()
-        GlobalScope.async {
-            var status = statusActor()
-            while (getCurrentCount(status) != 0){
-                delay(100)}
-        }.await()
+    fun stop(){
+        GlobalScope.launch {
+            Log.d(TAG, "stop: status is ${getStatus(actor)}")
+            /*if(getStatus(actor) == Status.GOTOWORK) {
+                Log.d(TAG, "stop: status is GOTOWOR so wait")
+                waitStatus(Status.WORKING)
+            }
+            if(getStatus(actor) == Status.WORKING) {*/
+                Log.d(TAG, "stop: going to stop")
+                actor.send(StatusMsg.GoToStop)
+            //}
+        }
     }
+
+    private var mainThread: Job? = null
+
+    private suspend fun waitStatus(status: Status) {
+        Log.d(TAG, "current status: ${getStatus(actor)} waiting $status")
+            while (getStatus(actor) != status){
+                delay(100)}
+    }
+
+    private suspend fun waitJobsEnd() {
+            while (getCurrentCount(actor) == 0){
+                delay(100)}
+    }
+
+    fun start() {
+        GlobalScope.launch {
+            /*if (getStatus(actor) == Status.GOTOSTOP) {
+                Log.d(TAG, "start: status is GOTOSTOP so wait")
+                waitStatus(Status.STOPPED)
+            }
+            if (getStatus(actor) == Status.STOPPED) {*/
+                Log.d(TAG, "start: going to work")
+                actor.send(StatusMsg.GoToWork)
+            //}
+        }
+    }
+
+     init {
+         start()
+     }
+
+    suspend fun status() = getStatus(actor)
 
     suspend fun startWorker(worker: ConnectionWorker) {
-        var wtask = GlobalScope.async {
-            var status = statusActor()
-            status.send(StatusMsg.IncCounter)
-            var workID = getCurrentCount(status)
+         GlobalScope.launch {
+            actor.send(StatusMsg.IncCounter)
+            var workID = getCurrentCount(actor)
             Log.d(TAG, "start work $workID")
             worker.run()
             Log.d(TAG, "stop work $workID")
-            status.send(StatusMsg.DisCounter)
+            actor.send(StatusMsg.DisCounter)
         }
     }
 
     suspend fun server(): String {
-        serverSoket = ServerSocket(port)
+        waitStatus(Status.WORKING)
         Log.d(TAG, "Server start on port : $port")
-        var status = statusActor()
-        while (getStatus(status)) {
-            var worker: ConnectionWorker? = null
+        serverSoket = ServerSocket(port)
+
+        Log.d(TAG, "Server status:${getStatus(actor)}")
+        while (getStatus(actor) == Status.WORKING) {
             try {
-                Log.d(TAG, "Ожидание соединения с клиентом")
+                Log.d(TAG, "Waiting client")
                 serverSoket?.let {
                     startWorker(ConnectionWorker(it.accept(), context))} ?: null
+                Log.d(TAG, "task started go to next")
 
             } catch (e: Exception) {
                 Log.d(TAG, "Connection error : ${e.message}")
-
                 if (serverSoket!!.isClosed) break
             }
         }
         Log.d(TAG, "Thread '${Thread.currentThread().name}' stoped")
-
+        serverSoket!!.close()
         return "" + Thread.currentThread().name
     }
 

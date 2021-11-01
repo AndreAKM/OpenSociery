@@ -49,10 +49,11 @@ class Connection(host: String) {
             )
         }
         try {
-            val writer = PrintWriter(
-                BufferedWriter(OutputStreamWriter(socket!!.getOutputStream())),true)
+            val writer =
+                BufferedWriter(OutputStreamWriter(socket!!.getOutputStream()))
+            Log.d(TAG, "sending data($data)")
+            writer.write(data + "\n")
             Log.d(TAG, "writer.write($data)")
-            writer.write(data)
             writer.flush()
         } catch (e: IOException) {
             throw Exception(

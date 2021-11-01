@@ -22,5 +22,13 @@ class CommandFactory {
             jsonObject.put(ConnectionWorker.DATA, owner!!.getJson())
             return jsonObject
         }
+
+        fun makeChangeIp(distination: Friend, owner: Friend): JSONObject {
+            var jsonObject = JSONObject()
+            jsonObject.put(ConnectionWorker.COMMAND, ConnectionWorker.IP)
+            jsonObject.put(ConnectionWorker.DATA,
+                JSONObject().put(Friend.HASH, owner.hash).put(Friend.IP, owner.ip))
+            return jsonObject
+        }
     }
 }

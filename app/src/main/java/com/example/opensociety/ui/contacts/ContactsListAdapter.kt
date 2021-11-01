@@ -1,25 +1,20 @@
 package com.example.opensociety.ui.contacts
 
-import android.content.Context
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Adapter
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.opensociety.R
 import com.example.opensociety.db.Contacts
-import com.example.opensociety.db.Friend
 
 class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<ContactsListAdapter.ViewHolder>() {
     val context = context
-    var contacts = Contacts(context).contactsList()
+    var contacts = Contacts(context).contactsAlphavitList()
     val TAG = "ContactsListAdapter"
     val CONTACT_DATA = context.getString(R.string.contact_data)
 
