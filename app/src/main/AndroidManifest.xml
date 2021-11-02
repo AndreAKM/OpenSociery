@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -14,11 +15,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.OpenSociety">
         <receiver
-            android:name=".connection.InernetConnectionReceiver"
+            android:name=".connection.FoneServiceReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <!--action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED " />
+                <action android:name="android.intent.action.BOOT_COMPLETED " /-->
             </intent-filter>
         </receiver>
 
