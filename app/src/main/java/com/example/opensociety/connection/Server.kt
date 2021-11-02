@@ -129,7 +129,7 @@ class Server(context: Context) {
     }
 
     private suspend fun waitJobsEnd() {
-            while (getCurrentCount(actor) == 0){
+            while (getCurrentCount(actor) != 0){
                 delay(100)}
     }
 
