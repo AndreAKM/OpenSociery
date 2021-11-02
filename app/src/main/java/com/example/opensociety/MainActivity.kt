@@ -11,13 +11,12 @@ import com.example.opensociety.databinding.ActivityMainBinding
 import android.content.Intent
 import com.example.opensociety.connection.FoneClientService
 import android.os.Build
-
-
-
+import android.util.Log
+import com.example.opensociety.connection.ServiceCommandBuilder
 
 
 class MainActivity : AppCompatActivity() {
-
+    val TAG = "MainActivity"
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +34,10 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_contacts_list))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-        val intentService = Intent(this, FoneClientService::class.java)
-        stopService(intentService)
+        var intentService = ServiceCommandBuilder(this)
+            .setCommand(ServiceCommandBuilder.Command.START).build()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "start foreground service")
             startForegroundService(intentService)
         } else {
             startService(intentService)

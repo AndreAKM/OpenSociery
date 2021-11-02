@@ -67,7 +67,7 @@ class Server(context: Context) {
                     }
                 }
                 is StatusMsg.GoToWork -> {
-                    Log.d(TAG, "actor gets GoToWork")
+                    Log.d(TAG, "actor gets GoToWork: current status $status")
                     if(status == Status.STOPPED) {
                         status = Status.WORKING
                         mainThread = GlobalScope.launch {
@@ -178,11 +178,12 @@ class Server(context: Context) {
 
             } catch (e: Exception) {
                 Log.d(TAG, "Connection error : ${e.message}")
-                if (serverSoket!!.isClosed) break
+                serverSoket?.isClosed
+                break
             }
         }
         Log.d(TAG, "Thread '${Thread.currentThread().name}' stoped")
-        serverSoket!!.close()
+        serverSoket?.close()
         return "" + Thread.currentThread().name
     }
 

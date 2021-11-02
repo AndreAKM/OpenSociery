@@ -58,7 +58,7 @@ class ConnectionWorker(socket: Socket, context: Context) {
         var result = ""
         when (json.getString(COMMAND)) {
             ACCESS_REQUEST -> contacts.add_friend(json.getJSONObject(DATA),
-                Friend.Status.APPLIED.ordinal)
+                Friend.Status.APPLIED.toString())
             CHANGE_ACCESS_STATUS -> contacts.add_friend(json)
             MESSAGE -> chat_m.registrationInputMessage(json)
             HASH -> contacts.updateContactHash(json.getJSONObject(DATA))

@@ -43,8 +43,8 @@ class Contacts(context: Context) {
         return id
     }
 
-    public fun add_friend(json: JSONObject, status: Int): Long? {
-        val friend = Friend(json, Friend.Status.intToStatus(status))
+    public fun add_friend(json: JSONObject, status: String): Long? {
+        val friend = Friend(json, Friend.Status.valueOf(status))
         if (find_contact(JSONObject().put(Friend.NICK, friend.nick)
                 .put(Friend.FIRST_NAME, friend.first_name)
                 .put(Friend.SECOND_NAME, friend.second_name)
@@ -54,7 +54,7 @@ class Contacts(context: Context) {
         return add_friend(friend)
     }
 
-    public fun add_friend(json: JSONObject) = add_friend(json, json.getInt(Friend.STATUS))
+    public fun add_friend(json: JSONObject) = add_friend(json, json.getString(Friend.STATUS))
 
     public fun get_contacts(json: JSONObject): Array<Friend> {
         var result = emptyArray<Friend>()

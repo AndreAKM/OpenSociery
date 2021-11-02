@@ -27,16 +27,63 @@ import com.example.opensociety.db.Contacts
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import android.app.PendingIntent
+
+
+
 
 
 class FoneClientService : Service() {
     val TAG = "FoneClientService"
     private var server:Server = Server(this)
     val CHANNEL_ID = "OpenSocietyServerService"
+    var isServiceStarted = false
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "onCreate server: $server")
+        sentNotification("Starting foreground service")
         registerNetworkCallback()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy")
+        server?.stop()
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        if(intent != null) {
+            val command = ServiceCommandBuilder(intent, this)
+            Log.d(
+                TAG, "onStartCommand: Service is started ($isServiceStarted). " +
+                        "command: ${command.command}. startId: $startId"
+            )
+            routeIntentToCommand(command)
+        }
+        return START_NOT_STICKY
+    }
+
+    private fun routeIntentToCommand(command: ServiceCommandBuilder) {
+        // Process command.
+        when (command.command) {
+            ServiceCommandBuilder.Command.START -> commandStart()
+            ServiceCommandBuilder.Command.STOP -> stopCommand()
+        }
+    }
+
+    private fun commandStart() {
+        if (!isServiceStarted) {
+            isServiceStarted = true
+            server.start()
+            return
+        }
+    }
+    private fun stopCommand() {
+        stopForeground(true)
+        isServiceStarted = false
+        server.stop()
+        stopSelf()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -50,12 +97,34 @@ class FoneClientService : Service() {
         channel.setLightColor(Color.RED);
         channel.enableVibration(true);
         notificationManager.createNotificationChannel(channel);
-        val builder: NotificationCompat.Builder? = NotificationCompat.Builder(this, CHANNEL_ID)
+        /* Create Pending Intents.
+        // Create Pending Intents.
+        val piLaunchMainActivity: PendingIntent = getLaunchActivityPI(context)*/
+        val piStopService: PendingIntent = getStopServicePI(this)
+
+        // Action to stop the service.
+
+        // Action to stop the service.
+        val stopAction: Notification.Action = Notification.Action.Builder(
+            R.drawable.btn_dialog,
+            "Close the service",
+            piStopService
+        )
+            .build()
+        val builder = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.sym_def_app_icon)
             .setContentTitle(TAG)
             .setContentText(message)
+            .setActions(stopAction)
         val notification: Notification = builder!!.build()
         startForeground(101, notification);
+    }
+
+    private fun getStopServicePI(context: Service): PendingIntent {
+        val iStopService: Intent = ServiceCommandBuilder(context).
+            setCommand(ServiceCommandBuilder.Command.STOP).build()
+        return PendingIntent.getService(
+            context, 101, iStopService, 0)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -70,7 +139,7 @@ class FoneClientService : Service() {
                 override fun onAvailable(network: Network) {
                     Log.d(TAG, "onAvailable: starting server")
                     sentNotification("online")
-                        server.start()
+                        server!!.start()
 
                     contacts.updateIP()
                 }
@@ -78,7 +147,7 @@ class FoneClientService : Service() {
                 override fun onLost(network: Network) {
                     Log.d(TAG, "onLost: stopping server")
                     sentNotification("offline")
-                        server.stop()
+                        server!!.stop()
                 }
             }
             )
