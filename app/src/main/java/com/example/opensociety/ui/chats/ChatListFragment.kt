@@ -1,4 +1,4 @@
-package com.example.opensociety.ui.dashboard
+package com.example.opensociety.ui.chats
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,10 +8,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.opensociety.R
 import com.example.opensociety.databinding.FragmentDashboardBinding
 
-class DashboardFragment : Fragment() {
+class ChatListFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
     private var _binding: FragmentDashboardBinding? = null

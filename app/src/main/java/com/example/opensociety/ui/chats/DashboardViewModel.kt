@@ -1,4 +1,4 @@
-package com.example.opensociety.ui.dashboard
+package com.example.opensociety.ui.chats
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

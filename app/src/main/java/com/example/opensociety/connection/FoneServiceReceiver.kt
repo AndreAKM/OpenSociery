@@ -11,7 +11,7 @@ import com.example.opensociety.db.Contacts
 
 class FoneServiceReceiver : BroadcastReceiver() {
     val TAG = "FoneServiceReceiver"
-    
+
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(TAG, "catch ${intent.action.toString()}")
         val intentService = ServiceCommandBuilder(context)
