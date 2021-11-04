@@ -6,18 +6,21 @@ import org.json.JSONObject
 
 class Friend(ip: String = "", nick: String = "",
              first_name: String = "", second_name: String = "",
-             family_name: String = "", avatar: String = "",
-             status: Status = Status.APPLIED, hash:Long = 0, id: Long? = null ) {
+             family_name: String = "", birthday:String = "", avatar: String = "",
+             status: Status = Status.APPLIED, hash:Long = 0, id: Long? = null,
+             create_time: String? = null) {
 
-    var id = id
+    var id: Long? = null
     var ip = ip
     var nick = nick
     var first_name = first_name
     var second_name = second_name
     var family_name = family_name
+    var birthday = birthday
     var avatar = avatar
     var status = status
     var hash = hash
+    var create_time: String? = null
 
     enum class Status {
         OWNER,
@@ -43,9 +46,12 @@ class Friend(ip: String = "", nick: String = "",
         val FIRST_NAME = DbStructure.F_FIRST_NAME
         val SECOND_NAME = DbStructure.F_SECOND_NAME
         val FAMILY_NAME = DbStructure.F_FAMILY_NAME
+        val BIRTHDAY = DbStructure.F_BIRTHDAY
         val AVATAR = DbStructure.F_AVATAR
         val STATUS = DbStructure.F_STATUS
         val HASH = DbStructure.F_HASH
+        val CREATING_TIME = DbStructure.F_CREATIMG_TIME
+
         val COLUMNS = arrayOf(
             ID,
             IP,
@@ -62,13 +68,20 @@ class Friend(ip: String = "", nick: String = "",
     constructor(jsonObject: JSONObject, status: Status) : this(jsonObject.getString(IP),
         jsonObject.getString(NICK), jsonObject.getString(FIRST_NAME),
         jsonObject.getString(SECOND_NAME), jsonObject.getString(FAMILY_NAME),
-        jsonObject.getString(AVATAR), status, jsonObject.getLong(HASH),jsonObject.getLong(ID)) {}
+        jsonObject.getString(BIRTHDAY), jsonObject.getString(AVATAR), status,
+        jsonObject.getLong(HASH)) {
+        id = jsonObject.getLong(ID)
+        create_time = jsonObject.getString(CREATING_TIME)
+    }
 
     constructor(jsonObject: JSONObject) : this(jsonObject.getString(IP),
         jsonObject.getString(NICK), jsonObject.getString(FIRST_NAME),
         jsonObject.getString(SECOND_NAME), jsonObject.getString(FAMILY_NAME),
-        jsonObject.getString(AVATAR), Status.valueOf(jsonObject.getString(STATUS)),
-        jsonObject.getLong(HASH), jsonObject.getLong(ID)) {}
+        jsonObject.getString(BIRTHDAY), jsonObject.getString(AVATAR),
+        Status.valueOf(jsonObject.getString(STATUS)), jsonObject.getLong(HASH)) {
+        id = jsonObject.getLong(ID)
+        create_time = jsonObject.getString(CREATING_TIME)
+    }
 
     public fun getTitle() = when {
         nick.isNotEmpty() -> nick
@@ -85,6 +98,7 @@ class Friend(ip: String = "", nick: String = "",
             Pair(FIRST_NAME, first_name),
             Pair(SECOND_NAME,second_name),
             Pair(FAMILY_NAME, family_name),
+            Pair(BIRTHDAY, birthday),
             Pair(AVATAR, avatar),
             Pair(STATUS, status.name),
             Pair(HASH, hash)
@@ -99,6 +113,7 @@ class Friend(ip: String = "", nick: String = "",
             .put(FIRST_NAME, first_name)
             .put(SECOND_NAME,second_name)
             .put(FAMILY_NAME, family_name)
+            .put(BIRTHDAY, birthday)
             .put(AVATAR, avatar)
             .put(STATUS, status)
             .put(HASH, hash)

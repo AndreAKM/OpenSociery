@@ -82,7 +82,7 @@
                 android:layout_alignParentEnd="true"
                 android:background="?attr/selectableItemBackground"
                 android:text="Send"
-                android:textColor="@color/" />
+                android:textColor="#000000" />
 
         </RelativeLayout>
 

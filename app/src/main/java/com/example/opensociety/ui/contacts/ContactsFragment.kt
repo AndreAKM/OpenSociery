@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -46,7 +47,13 @@ class ContactsFragment : Fragment() {
         //val textView: TextView = binding.ownContactInfo
         var contactsList: RecyclerView = binding.contactsList
         contactsList.layoutManager = LinearLayoutManager(context)
-        contactsList.adapter = activitynContext?.let { ContactsListAdapter(it) }
+        var adapter = activitynContext?.let { ContactsListAdapter(it) }
+        contactsList.adapter = adapter
+        if(adapter?.itemCount == 0) {
+            val bundle = context?. let{bundleOf(it.getString(R.string.contact_id) to 1L)}
+            findNavController().navigate(
+                R.id.action_navigation_contacts_list_to_navigation_contact_data, bundle)
+        }
         /*contactsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })*/

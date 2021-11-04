@@ -25,7 +25,6 @@ class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<Contac
         init {
             largeTextView = itemView.findViewById(R.id.name)
             smallTextView = itemView.findViewById(R.id.data)
-
         }
     }
 
@@ -52,9 +51,7 @@ class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<Contac
         }
     }
 
-override fun getItemCount(): Int {
-return contacts.size
-}
-
-
+    override fun getItemCount(): Int {
+    return contacts.size
+    }
 }

@@ -39,39 +39,38 @@ class DbStructure(context: Context):
         val F_AUTHOR_ID = "author_id"
         val F_CONTACT_ID = "contact_id"
         val F_IS_SYNC = "is_sync"
-        
+        val F_CREATIMG_TIME = "creating_time"
+        val F_BIRTHDAY = "birthday"
+
         private val DEFAULT_TEXT = " TEXT DEFAULT \"\" NOT NULL"
         private val DEFAULT_INT = " INTEGER DEFAULT 0 NOT NULL"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
         if (db != null) {
-            db.execSQL("CREATE TABLE " + TB_CONTACTS +
-                    "( "+ F_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    F_IP + DEFAULT_TEXT + ", " + F_NICK_NAME + DEFAULT_TEXT + ", " +
-                    F_FIRST_NAME + DEFAULT_TEXT + ", " + F_SECOND_NAME + DEFAULT_TEXT +", " +
-                    F_FAMILY_NAME + DEFAULT_TEXT + ", " + F_AVATAR + DEFAULT_TEXT +", " + F_HASH +
-                    " INTEGER DEFAULT 0 NOT NULL," +
-                    F_STATUS + " TEXT DEFAULT \"UNKNOWN\" NOT NULL);")
-            db.execSQL("CREATE TABLE " + TB_IP_LIST + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_IP + DEFAULT_TEXT + ", " +
-                    F_CONTACT_ID + DEFAULT_INT + ", UNIQUE (" + F_IP  + ", " + F_CONTACT_ID + "));");
-            db.execSQL("CREATE TABLE " + TB_HASH_LIST + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_HASH + " INTEGER NOT NULL" + ", " +
-                    F_CONTACT_ID + " INTEGER NOT NULL" + ", UNIQUE (" + F_HASH  + ", " +
-                    F_CONTACT_ID + "));");
-            db.execSQL("CREATE TABLE " + TB_NEWS + "( " + F_ID +
-                " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_MESSAGE_ID + " INTEGER);");
-            db.execSQL("CREATE TABLE " + TB_CHATS_LIST + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_PARENT_ID + DEFAULT_INT + ", " +
-                    F_HASH + " INTEGER UNIQUE," + F_FRIEND_ID + DEFAULT_TEXT + ");");
-            db.execSQL("CREATE TABLE " + TB_MESSAGES + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_AUTHOR_ID + DEFAULT_INT + ", " +
-                    F_IS_SYNC + DEFAULT_TEXT + ", " + F_DATA + DEFAULT_TEXT + ");");
-            db.execSQL("CREATE TABLE " + TB_VIEWERS + "( " + F_ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " + F_MESSAGE_ID + DEFAULT_INT + ", " +
-                    F_FRIEND_ID+ DEFAULT_INT + ", UNIQUE (" + F_MESSAGE_ID  + ", " + F_FRIEND_ID + "));")
-            db.execSQL("INSERT INTO " + TB_CONTACTS + " (" + F_FAMILY_NAME +") VALUES (\"YOUR CONTACT INFORMATION\");")
+            db.execSQL("CREATE TABLE $TB_CONTACTS ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$F_IP $DEFAULT_TEXT, $F_NICK_NAME $DEFAULT_TEXT, $F_FIRST_NAME $DEFAULT_TEXT,"+
+                    " $F_SECOND_NAME $DEFAULT_TEXT, $F_FAMILY_NAME $DEFAULT_TEXT, $F_AVATAR " +
+                    "$DEFAULT_TEXT, $F_BIRTHDAY TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, $F_HASH INTEGER DEFAULT 0 NOT NULL," +
+                    " $F_STATUS TEXT DEFAULT \"UNKNOWN\" NOT NULL, $F_CREATIMG_TIME TIMESTAMP" +
+                    " DEFAULT CURRENT_TIMESTAMP NOT NULL );")
+            db.execSQL("CREATE TABLE $TB_IP_LIST ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$F_IP $DEFAULT_TEXT, $F_CONTACT_ID $DEFAULT_INT," +
+                    " UNIQUE ($F_IP, $F_CONTACT_ID));");
+            db.execSQL("CREATE TABLE $TB_HASH_LIST ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$F_HASH INTEGER NOT NULL, $F_CONTACT_ID INTEGER NOT NULL," +
+                    " UNIQUE ($F_HASH, $F_CONTACT_ID));");
+            db.execSQL("CREATE TABLE $TB_NEWS ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$F_MESSAGE_ID INTEGER);");
+            db.execSQL("CREATE TABLE $TB_CHATS_LIST ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    "$F_PARENT_ID DEFAULT_INT, $F_HASH INTEGER UNIQUE, $F_FRIEND_ID $DEFAULT_TEXT);");
+            db.execSQL("CREATE TABLE $TB_MESSAGES ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$F_AUTHOR_ID DEFAULT_INT, $F_IS_SYNC DEFAULT_TEXT, $F_DATA DEFAULT_TEXT, " +
+                    "$F_CREATIMG_TIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL);");
+            db.execSQL("CREATE TABLE $TB_VIEWERS ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$F_MESSAGE_ID DEFAULT_INT, $F_FRIEND_ID DEFAULT_INT," +
+                    " UNIQUE ($F_MESSAGE_ID, $F_FRIEND_ID));")
+            //db.execSQL("INSERT INTO $TB_CONTACTS ($F_FAMILY_NAME) VALUES (\"YOUR CONTACT INFORMATION\");")
         }
 
     }

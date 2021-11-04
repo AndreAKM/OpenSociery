@@ -24,7 +24,7 @@ import java.util.*
 class Contacts(context: Context) {
     val TAG = "Contacts"
     val context = context
-    var hash = calculateHash()
+    var hash = getHash() .takeIf { it != 0L }?. let{it} ?: calculateHash()
 
     companion object {
         val CONTACTS_URI: Uri =
@@ -39,7 +39,6 @@ class Contacts(context: Context) {
         val id = context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
             ContentUris.parseId(it)
         } ?: return null
-        updateHash(id)
         return id
     }
 
@@ -77,8 +76,8 @@ class Contacts(context: Context) {
         }
         var cursor = context.contentResolver?.query(
             CONTACTS_URI, null, select, selectArgs,
-            Friend.NICK + ", " + Friend.FAMILY_NAME + ", " + Friend.SECOND_NAME + ", " +
-                Friend.FAMILY_NAME
+            "(${Friend.NICK}, ${Friend.FIRST_NAME}, ${Friend.SECOND_NAME}," +
+                    " ${Friend.FAMILY_NAME})" // GROUP BY (${Friend.STATUS})
         )
         return cursor?.let { cursorToContacksArray(it) } ?: null
     }
@@ -108,7 +107,7 @@ class Contacts(context: Context) {
             it.update(
                 Uri.withAppendedPath(CONTACTS_URI, friend.id.toString()),
                 friend.getContentValues(), null, null)
-            updateHash(friend.id!!)
+            //TODO if it is a duplicate of the contact add the new hash in the hash list
         }
 
     public fun updateContactIP(json: JSONObject) =
@@ -138,15 +137,14 @@ class Contacts(context: Context) {
     private fun calculateHash(): Int {
         var cursor = context.contentResolver.query(
             CONTACTS_URI,
-            arrayOf(Friend.NICK, Friend.FAMILY_NAME, Friend.SECOND_NAME, Friend.FAMILY_NAME),
-            Friend.ID + " BETWEEN 1 AND 5",
+            arrayOf(Friend.IP, Friend.CREATING_TIME),
+            "${Friend.ID} = 1",
             null,
             Friend.ID
         )
         return cursor?.let {
             var accum = ""
             if (cursor.moveToFirst()) {
-
                 do {
                     for(i in 0 until it.columnCount) {
                         accum += it.getString(i)
@@ -166,27 +164,37 @@ class Contacts(context: Context) {
         }
     }
 
+    public fun getHash(): Long {
+        var cursor = context.contentResolver.query(
+            Uri.withAppendedPath(CONTACTS_URI, "1"),
+            arrayOf(Friend.HASH), null, null, null)
+        return cursor?.let {
+            it.takeIf{it.moveToFirst()}?. getLong(it.getColumnIndex(Friend.HASH))
+        } ?: 0L
+    }
+
     public fun updateIP(): String {
         var ip = getIPAddress()
         if (getIP() != ip) {
             Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
-            var owner: Friend? = null
-            if (isNetworkAvailable(context)) for (c in contactsList()) {
-                if (c.id == 1L) {
-                    owner = c
-                    Log.d(TAG, "owner is ${owner.getJson()}")
-                }
-                else {
-                    Log.d(TAG, "Send Updated IP($owner.ip) to ${c.getTitle()}: $c.ip")
-                    GlobalScope.launch {
-                        val command =
-                            CommandFactory.makeChangeIp(c, owner!!)
-                        try {
-                            var connection = Connection(c!!.ip)
-                            connection.openConnection()
-                            connection.sendData(command.toString())
-                        } catch (e: Exception) {
-                            Log.e(TAG, "can not send $command to ${c.getTitle()}: $c.ip")
+            if (isNetworkAvailable(context)) contactsList().takeIf { it.isNotEmpty() }?. let {
+                var owner: Friend? = null
+                for (c in it) {
+                    if (c.id == 1L) {
+                        owner = c
+                        Log.d(TAG, "owner is ${owner.getJson()}")
+                    } else if (owner != null){
+                        Log.d(TAG, "Send Updated IP($owner.ip) to ${c.getTitle()}: $c.ip")
+                        GlobalScope.launch {
+                            val command =
+                                CommandFactory.makeChangeIp(c, owner!!)
+                            try {
+                                var connection = Connection(c!!.ip)
+                                connection.openConnection()
+                                connection.sendData(command.toString())
+                            } catch (e: Exception) {
+                                Log.e(TAG, "can not send $command to ${c.getTitle()}: $c.ip")
+                            }
                         }
                     }
                 }
@@ -196,10 +204,6 @@ class Contacts(context: Context) {
         return ip
     }
 
-    private fun updateHash(contactId:Long) = if (contactId > 5) hash else {
-            hash = calculateHash()
-            updateContactHash(1, hash)
-        }
     private fun cursorToContack(cursor: Cursor) = cursor.takeIf { it.moveToFirst() }?. let {
                 Friend(
                     cursor.getString(cursor.getColumnIndex(Friend.IP)),
@@ -207,10 +211,12 @@ class Contacts(context: Context) {
                     cursor.getString(cursor.getColumnIndex(Friend.FIRST_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.SECOND_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.FAMILY_NAME)),
+                    cursor.getString(cursor.getColumnIndex(Friend.BIRTHDAY)),
                     cursor.getString(cursor.getColumnIndex(Friend.AVATAR)),
                     Friend.Status.valueOf(cursor.getString(cursor.getColumnIndex(Friend.STATUS))),
                     cursor.getLong(cursor.getColumnIndex(Friend.HASH)),
-                    cursor.getLong(cursor.getColumnIndex(Friend.ID))
+                    cursor.getLong(cursor.getColumnIndex(Friend.ID)),
+                    cursor.getString(cursor.getColumnIndex(Friend.CREATING_TIME))
                 )
         } ?: null
 
@@ -225,10 +231,13 @@ class Contacts(context: Context) {
                     cursor.getString(cursor.getColumnIndex(Friend.FIRST_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.SECOND_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.FAMILY_NAME)),
+//                    cursor.getString(cursor.getColumnIndex(Friend.BIRTHDAY)),
+                    "01:15:20",
                     cursor.getString(cursor.getColumnIndex(Friend.AVATAR)),
                     Friend.Status.valueOf(cursor.getString(cursor.getColumnIndex(Friend.STATUS))),
                     cursor.getLong(cursor.getColumnIndex(Friend.HASH)),
-                    cursor.getLong(cursor.getColumnIndex(Friend.ID))
+                    cursor.getLong(cursor.getColumnIndex(Friend.ID)),
+                    null//cursor.getString(cursor.getColumnIndex(Friend.CREATING_TIME))
                 )
             } while (cursor.moveToNext())
         }

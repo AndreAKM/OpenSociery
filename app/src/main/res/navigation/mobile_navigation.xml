@@ -24,25 +24,70 @@
         tools:layout="@layout/fragment_contacs_list" >
         <action
             android:id="@+id/action_navigation_contacts_list_to_navigation_contact_data"
-            app:destination="@id/navigation_contact_data"
+            app:destination="@id/novigation_contact_data_fragment"
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_navigation_contacts_list_to_contactOtherDataEditingFragment"
+            app:destination="@id/novigation_contact_other_data_editing_fragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@android:anim/slide_in_left"
             app:popExitAnim="@android:anim/slide_out_right" />
     </fragment>
 
     <fragment
-        android:id="@+id/navigation_contact_data"
-        android:name="com.example.opensociety.ui.contacts.ContactData"
+        android:id="@+id/navigation_contact_own_data_editing"
+        android:name="com.example.opensociety.ui.contacts.ContactOwnDataEditing"
         android:label="@string/title_contacts_list"
-        tools:layout="@layout/contact_data_fragment" >
+        tools:layout="@layout/fragment_contact_own_data_editing" >
         <argument
             android:name="@string/contact_data"
             app:argType="string"
             android:defaultValue="@null" />
         <argument
             android:name="@string/contact_id"
-            app:argType="integer"
-            android:defaultValue="-1" />
+            app:argType="long" />
     </fragment>
+    <fragment
+        android:id="@+id/novigation_contact_data_fragment"
+        android:name="com.example.opensociety.ui.contacts.ContactDataFragment"
+        android:label="fragment_contact_data"
+        tools:layout="@layout/fragment_contact_data" >
+        <action
+            android:id="@+id/action_contactDataFragment_to_navigation_contact_data"
+            app:destination="@id/navigation_contact_own_data_editing"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_contactDataFragment_to_contactOtherDataEditingFragment"
+            app:destination="@id/novigation_contact_other_data_editing_fragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <argument
+            android:name="@string/contact_data"
+            app:argType="string"
+            android:defaultValue="@null" />
+        <argument
+            android:name="@string/contact_id"
+            app:argType="long" />
+    </fragment>
+    <fragment
+        android:id="@+id/novigation_contact_other_data_editing_fragment"
+        android:name="com.example.opensociety.ui.contacts.ContactOtherDataEditingFragment"
+        android:label="fragment_contact_other_data_editing"
+        tools:layout="@layout/fragment_contact_other_data_editing" />
+    <argument
+        android:name="@string/contact_data"
+        app:argType="string"
+        android:defaultValue="@null" />
+    <argument
+        android:name="@string/contact_id"
+        app:argType="long" />
 </navigation>

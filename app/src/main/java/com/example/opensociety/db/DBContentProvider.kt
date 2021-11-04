@@ -34,13 +34,6 @@ class DBContentProvider : ContentProvider() {
         val HASH_LIST_ID = HASH_LIST +1
     }
     init {
-        /*val TB_CONTACTS = "contacts"
-        val TB_IP_LIST = "ip_list"
-        val TB_HASH_LIST = "hash_list"
-        val TB_NEWS = "news"
-        val TB_CHATS_LIST = "chats_list"
-        val TB_MESSAGES = "messages"
-        val TB_VIEWERS = "viewers"*/
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_CONTACTS, CONTACTS)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_IP_LIST, IP_LIST)
         uriMatcher.addURI(AUTHORITIES, DbStructure.TB_HASH_LIST, HASH_LIST)

@@ -1,13 +1,15 @@
 package com.example.opensociety.db
 
 import org.json.JSONObject
+import com.example.opensociety.db.Friend
 
-class Message(author_id: Long, is_sync: Boolean, data: String) {
+class Message(author_id: Long, is_sync: Boolean, data: String, time: String? = null) {
 
     var id: Int? = null
     var author_id = author_id
     var is_sync = is_sync
-    var data = data
+    var body = data
+    var time = time
 
     companion object {
         val ID = DbStructure.F_ID
@@ -16,7 +18,8 @@ class Message(author_id: Long, is_sync: Boolean, data: String) {
         val DATA = DbStructure.F_DATA
     }
 
+
     constructor(json: JSONObject, is_sync: Boolean, author_id: Long):
-            this(author_id, is_sync, json.getString(DATA) )
+        this(author_id, is_sync, json.getString(DATA) ) {}
 
 }
