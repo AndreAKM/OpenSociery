@@ -17,6 +17,7 @@ class ConnectionWorker(socket: Socket, context: Context) {
         const val COMMAND = "command"
         const val ACCESS_REQUEST = "access_request"
         const val CHANGE_ACCESS_STATUS = "access_answer"
+        const val UPDATE_FORM = "update_form"
         const val MESSAGE = "message"
         const val HASH = "hash"
         const val IP = "ip"

@@ -83,12 +83,12 @@ class ContactDataFragment : Fragment() {
                 _binding.familyName.text = friend!!.family_name
                 _binding.birthday.text = friend!!.birthday
                 _binding.IP.text = friend!!.ip
-                _binding.status.setSelection(friend!!.status.ordinal)
+                _binding.status.text = (friend!!.status.toString())
             }
             id == 1L -> contacts?.getIPAddress(true). also {
                 Log.d (TAG, "ID: 1 IP: $it") } .let{
                 _binding.IP.text = it
-                _binding.status.setSelection(Friend.Status.OWNER.ordinal)
+                _binding.status.text = (Friend.Status.OWNER.toString())
                 if(contacts?.get_contact(1L) == null)
                     findNavController().navigate(when(id) {
                         1L -> R.id.navigation_contact_own_data_editing

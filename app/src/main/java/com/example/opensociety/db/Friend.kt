@@ -70,17 +70,13 @@ class Friend(ip: String = "", nick: String = "",
         jsonObject.getString(SECOND_NAME), jsonObject.getString(FAMILY_NAME),
         jsonObject.getString(BIRTHDAY), jsonObject.getString(AVATAR), status,
         jsonObject.getLong(HASH)) {
-        id = jsonObject.getLong(ID)
-        create_time = jsonObject.getString(CREATING_TIME)
+        if(jsonObject.has(ID))id = jsonObject.getLong(ID)
+        if(jsonObject.has(CREATING_TIME)) create_time = jsonObject.getString(CREATING_TIME)
     }
 
-    constructor(jsonObject: JSONObject) : this(jsonObject.getString(IP),
-        jsonObject.getString(NICK), jsonObject.getString(FIRST_NAME),
-        jsonObject.getString(SECOND_NAME), jsonObject.getString(FAMILY_NAME),
-        jsonObject.getString(BIRTHDAY), jsonObject.getString(AVATAR),
-        Status.valueOf(jsonObject.getString(STATUS)), jsonObject.getLong(HASH)) {
-        id = jsonObject.getLong(ID)
-        create_time = jsonObject.getString(CREATING_TIME)
+    constructor(jsonObject: JSONObject):
+            this(jsonObject, Status.valueOf(jsonObject.getString(STATUS))) {
+
     }
 
     public fun getTitle() = when {

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.contacts.ContactDataFragment">
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
@@ -35,7 +35,7 @@
 
                 <TextView
                     android:id="@+id/nickname"
-                    android:layout_gravity="right"
+                    android:layout_gravity="center"
                     android:inputType="text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
 
                 <TextView
                     android:id="@+id/firs_name"
-                    android:layout_gravity="right"
+                    android:layout_gravity="center"
                     android:inputType="none"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:layout_width="wrap_content"
@@ -71,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_gravity="right"/>
+                    android:layout_gravity="center"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_gravity="right"/>
+                    android:layout_gravity="center"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -103,7 +103,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_gravity="right"/>
+                    android:layout_gravity="center"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -120,20 +120,21 @@
                     android:inputType="numberDecimal"
                     android:digits="0123456789."
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_gravity="right"/>
+                    android:layout_gravity="center"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_gravity="right"
+                    android:layout_gravity="left"
                     android:textStyle="bold"
                     android:text="@string/status"/>
 
-                <Spinner
+                <TextView
                     android:id="@+id/status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

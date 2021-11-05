@@ -30,5 +30,12 @@ class CommandFactory {
                 JSONObject().put(Friend.HASH, owner.hash).put(Friend.IP, owner.ip))
             return jsonObject
         }
+
+        fun makeUpdateForm(distination: Friend, owner: Friend): JSONObject {
+            var jsonObject = JSONObject()
+            jsonObject.put(ConnectionWorker.COMMAND, ConnectionWorker.UPDATE_FORM)
+            jsonObject.put(ConnectionWorker.DATA, owner.getJson())
+            return jsonObject
+        }
     }
 }

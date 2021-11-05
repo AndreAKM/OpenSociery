@@ -173,32 +173,36 @@ class Contacts(context: Context) {
         } ?: 0L
     }
 
-    public fun updateIP(): String {
-        var ip = getIPAddress()
-        if (getIP() != ip) {
-            Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
-            if (isNetworkAvailable(context)) contactsList().takeIf { it.isNotEmpty() }?. let {
-                var owner: Friend? = null
-                for (c in it) {
-                    if (c.id == 1L) {
-                        owner = c
-                        Log.d(TAG, "owner is ${owner.getJson()}")
-                    } else if (owner != null){
-                        Log.d(TAG, "Send Updated IP($owner.ip) to ${c.getTitle()}: $c.ip")
-                        GlobalScope.launch {
-                            val command =
-                                CommandFactory.makeChangeIp(c, owner!!)
-                            try {
-                                var connection = Connection(c!!.ip)
-                                connection.openConnection()
-                                connection.sendData(command.toString())
-                            } catch (e: Exception) {
-                                Log.e(TAG, "can not send $command to ${c.getTitle()}: $c.ip")
-                            }
+    public fun sendToAll(makeCommand: (d: Friend, s: Friend) -> JSONObject) {
+        if (isNetworkAvailable(context)) contactsList().takeIf { it.isNotEmpty() }?. let {
+            var owner: Friend? = null
+            for (c in it) {
+                if (c.id == 1L) {
+                    owner = c
+                    Log.d(TAG, "owner is ${owner.getJson()}")
+                } else if (owner != null){
+                    Log.d(TAG, "Send Updated IP($owner.ip) to ${c.getTitle()}: $c.ip")
+                    GlobalScope.launch {
+                        val command =
+                            makeCommand(c, owner!!)
+                        try {
+                            var connection = Connection(c!!.ip)
+                            connection.openConnection()
+                            connection.sendData(command.toString())
+                        } catch (e: Exception) {
+                            Log.e(TAG, "can not send $command to ${c.getTitle()}: $c.ip")
                         }
                     }
                 }
             }
+        }
+    }
+
+    public fun updateIP(): String {
+        var ip = getIPAddress()
+        if (getIP() != ip) {
+            Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
+            sendToAll(CommandFactory::makeChangeIp)
         }
         Log.d(TAG, "updateIP()->" + ip);
         return ip

@@ -84,8 +84,7 @@ class ContactOwnDataEditing : Fragment() {
         Log.d(TAG, "friend: $friend")
         _binding =
             FragmentContactOwnDataEditingBinding.inflate(inflater, container,false)
-        _binding.status.adapter = context?.let {
-            ArrayAdapter<String>(it, android.R.layout.simple_spinner_item, Friend.Status.names())}
+
         val today = Calendar.getInstance()
         when {
             (friend != null) -> {
@@ -96,7 +95,7 @@ class ContactOwnDataEditing : Fragment() {
                 _binding.familyName.setText(friend!!.family_name)
                 _binding.birthday.text = friend!!.birthday
                 _binding.IP.text = friend!!.ip
-                _binding.status.setSelection(friend!!.status.ordinal)
+                _binding.status.text = (friend!!.status.toString())
                 //friend?. let{date = LocalDate.parse(it.birthday , firstApiFormat)}
             }
             else -> {
@@ -104,7 +103,7 @@ class ContactOwnDataEditing : Fragment() {
                     Log.d(TAG, "ID: 1 IP: $it")
                 }.let {
                     _binding.IP.setText(it)
-                    _binding.status.setSelection(Friend.Status.OWNER.ordinal)
+                    _binding.status.text = (Friend.Status.OWNER.toString())
                     _binding.birthday.text =
                         "${today.get(Calendar.YEAR)}-${today.get(Calendar.MONTH)}" +
                                 "-${today.get(Calendar.DATE)}"
@@ -125,29 +124,16 @@ class ContactOwnDataEditing : Fragment() {
         return _binding.root
     }
 
-    /*protected fun onCreateDialog(id: Int): Dialog? {
-        context?.let { DatePickerDialog(it, myCallBack, date.year, date.monthValue, date.dayOfMonth) }
-    }
-
-    var myCallBack =
-        DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-            _binding.birthday.setText("$year-${monthOfYear + 1}-$dayOfMonth")
-        }*/
-
     fun saveData() {
         friend!!.nick = _binding.nickname.text.toString()
         friend!!.first_name = _binding.firsName.text.toString()
         friend!!.second_name = _binding.secondName.text.toString()
         friend!!.family_name = _binding.familyName.text.toString()
-        val newStatus = Friend.Status.intToStatus(_binding.status.selectedItemId.toInt())
+        val newStatus = Friend.Status.OWNER
         if (newStatus != friend!!.status && 1L != friend!!.id) {
             friend!!.status = newStatus
             thread {
-                val command =
-                    CommandFactory.makeAskingAccess(friend!!, contacts!!.get_contact(1L)!!)
-                var connection = Connection(friend!!.ip)
-                connection.openConnection()
-                connection.sendData(command.toString())
+                contacts?.sendToAll(CommandFactory::makeUpdateForm)
             }
         }
         friend!!.ip = _binding.IP.text.toString()
