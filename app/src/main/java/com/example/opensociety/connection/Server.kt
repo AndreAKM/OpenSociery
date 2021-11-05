@@ -7,7 +7,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import java.lang.Exception
-import java.net.ServerSocket
+import java.net.*
+import java.util.*
 
 class Server(context: Context) {
     private val TAG = "Server"
@@ -37,6 +38,44 @@ class Server(context: Context) {
         companion object {
             fun intToStatus(value: Int) = Status.values()[value]
             fun names() = Status.values().map { it.name }
+        }
+    }
+
+    companion object {
+        fun getIPAddress(isIP4: Boolean = true): InetAddress? {
+            try {
+                val interfaces: List<NetworkInterface> =
+                    Collections.list(NetworkInterface.getNetworkInterfaces())
+                for (intf in interfaces) {
+                    val addrs: List<InetAddress> = Collections.list(intf.getInetAddresses())
+                    for (addr in addrs) {
+                        if (!addr.isLoopbackAddress() ) {
+                            //val sAddr: String = addr.getHostAddress()
+                            when(isIP4) {
+                                true -> if (addr is Inet4Address) {
+                                    return addr
+                                }
+                                false -> if (addr is Inet6Address) {
+                                    return addr
+                                    /**/
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return null
+        }
+        fun addresInString():String {
+            val addr = getIPAddress()
+            if (addr is Inet6Address) {
+                val sa = addr.getHostAddress()
+                val delim = sa.indexOf('%') // drop ip6 port suffix
+                return if (delim < 0) sa else sa.substring(0, delim)
+            }
+            return addr.toString()
         }
     }
 
@@ -166,7 +205,7 @@ class Server(context: Context) {
     suspend fun server(): String {
         waitStatus(Status.WORKING)
         Log.d(TAG, "Server start on port : $port")
-        serverSoket = ServerSocket(port)
+        serverSoket = ServerSocket(port,50, getIPAddress())
 
         Log.d(TAG, "Server status:${getStatus(actor)}")
         while (getStatus(actor) == Status.WORKING) {

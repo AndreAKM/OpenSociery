@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.example.opensociety.connection.CommandFactory
 import com.example.opensociety.connection.Connection
+import com.example.opensociety.connection.Server
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -221,13 +222,13 @@ class Contacts(context: Context) {
     }
 
     public fun updateIP(): String {
-        var ip = getIPAddress()
+        var ip = Server.addresInString()
         if (getIP() != ip) {
-            Log.d(TAG, "updateresult: " + updateContactIP(1, ip))
+            Log.d(TAG, "updateresult: " + updateContactIP(1, ip!!))
             sendToAll(CommandFactory::makeChangeIp)
         }
         Log.d(TAG, "updateIP()->" + ip);
-        return ip
+        return ip!!
     }
 
     private fun cursorToContack(cursor: Cursor) = cursor.takeIf { it.moveToFirst() }?. let {
@@ -283,33 +284,6 @@ class Contacts(context: Context) {
             CONTACTS_URI, null, null, null, Friend.ID
         )
         return cursor?.let { cursorToContacksArray(it) } ?: emptyArray()
-    }
-
-    fun getIPAddress(isIP4: Boolean = false): String {
-        try {
-            val interfaces: List<NetworkInterface> =
-                Collections.list(NetworkInterface.getNetworkInterfaces())
-            for (intf in interfaces) {
-                val addrs: List<InetAddress> = Collections.list(intf.getInetAddresses())
-                for (addr in addrs) {
-                    if (!addr.isLoopbackAddress() ) {
-                        val sAddr: String = addr.getHostAddress()
-                        when(isIP4) {
-                            true -> if (addr is Inet4Address) {
-                                return sAddr
-                            }
-                            false -> if (addr is Inet6Address) {
-                                val delim = sAddr.indexOf('%') // drop ip6 port suffix
-                                return if (delim < 0) sAddr else sAddr.substring(0, delim)
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return ""
     }
 
     private fun isNetworkAvailable(context: Context): Boolean {

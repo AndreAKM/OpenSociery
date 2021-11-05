@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.example.opensociety.R
+import com.example.opensociety.connection.Server
 import com.example.opensociety.databinding.FragmentContactDataBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
@@ -81,7 +82,7 @@ class ContactDataFragment : Fragment() {
                 _binding.status.text = (friend!!.status.toString())
                 id = friend!!.id
             }
-            id == 1L -> contacts?.getIPAddress(). also {
+            id == 1L -> Server.addresInString(). also {
                 Log.d (TAG, "ID: 1 IP: $it") } .let{
                 _binding.IP.text = it
                 _binding.status.text = (Friend.Status.OWNER.toString())

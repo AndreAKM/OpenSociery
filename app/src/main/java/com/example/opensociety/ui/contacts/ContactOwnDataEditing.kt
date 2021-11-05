@@ -10,6 +10,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import com.example.opensociety.R
 import com.example.opensociety.connection.CommandFactory
+import com.example.opensociety.connection.Server
 import com.example.opensociety.databinding.FragmentContactOwnDataEditingBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
@@ -86,7 +87,7 @@ class ContactOwnDataEditing : Fragment() {
                 _binding.status.text = (friend!!.status.toString())
             }
             else -> {
-                contacts?.getIPAddress().also {
+                Server.addresInString().also {
                     Log.d(TAG, "ID: 1 IP: $it")
                 }?.let {
                     _binding.IP.setText(it)

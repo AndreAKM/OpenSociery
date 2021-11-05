@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.opensociety.R
 import com.example.opensociety.connection.CommandFactory
 import com.example.opensociety.connection.Connection
+import com.example.opensociety.connection.Server
 import com.example.opensociety.databinding.FragmentContactOtherDataEditingBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
@@ -89,7 +90,7 @@ class ContactOtherDataEditingFragment : Fragment() {
                 _binding.IP.setText(friend!!.ip)
                 _binding.status.setSelection(friend!!.status.ordinal)
             }
-            id == 1L -> contacts?.getIPAddress(). also {
+            id == 1L -> Server.addresInString(). also {
                 Log.d (TAG, "ID: 1 IP: $it") } .let{ _binding.IP.setText(it)
                 _binding.status.setSelection(Friend.Status.OWNER.ordinal)
             }
