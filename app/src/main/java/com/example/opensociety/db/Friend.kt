@@ -3,6 +3,7 @@ package com.example.opensociety.db
 import android.content.ContentValues
 import androidx.core.content.contentValuesOf
 import org.json.JSONObject
+import java.util.*
 
 class Friend(ip: String = "", nick: String = "",
              first_name: String = "", second_name: String = "",
@@ -10,7 +11,7 @@ class Friend(ip: String = "", nick: String = "",
              status: Status = Status.APPLIED, hash:Long = 0, id: Long? = null,
              create_time: String? = null) {
 
-    var id: Long? = null
+    var id: Long? = id
     var ip = ip
     var nick = nick
     var first_name = first_name
@@ -20,7 +21,16 @@ class Friend(ip: String = "", nick: String = "",
     var avatar = avatar
     var status = status
     var hash = hash
-    var create_time: String? = null
+    val calendar = Calendar.getInstance()
+    var create_time: String? = when {
+        create_time == null ->
+            //YYYY-MM-DD HH:MM:SS
+            "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH)}" +
+                "-${calendar.get(Calendar.DATE)} ${calendar.get(Calendar.HOUR_OF_DAY)}:" +
+                "${calendar.get(Calendar.MINUTE)}:${calendar.get(Calendar.SECOND)}"
+        else -> create_time
+        }
+
 
     enum class Status {
         OWNER,
@@ -103,7 +113,7 @@ class Friend(ip: String = "", nick: String = "",
         return r
     }
 
-    public fun getJson() = JSONObject()
+    public fun getExportJson() = JSONObject()
             .put(IP, ip)
             .put(NICK, nick)
             .put(FIRST_NAME, first_name)
@@ -113,6 +123,18 @@ class Friend(ip: String = "", nick: String = "",
             .put(AVATAR, avatar)
             .put(STATUS, status)
             .put(HASH, hash)
-            .put(ID, id)
+
+    public fun getWholeJson() = JSONObject()
+        .put(IP, ip)
+        .put(NICK, nick)
+        .put(FIRST_NAME, first_name)
+        .put(SECOND_NAME,second_name)
+        .put(FAMILY_NAME, family_name)
+        .put(BIRTHDAY, birthday)
+        .put(AVATAR, avatar)
+        .put(STATUS, status)
+        .put(HASH, hash)
+        .put(ID, id)
+        .put(CREATING_TIME, create_time)
 
 }

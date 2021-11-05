@@ -64,9 +64,10 @@ class DBContentProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        Log.d(TAG, "insert(${uri.toString()}, ${values.toString()})")
         val id = dbHelper?.writableDatabase?.insert(UriToTbName(uri), null, values)
             ?: -1
+        Log.d(TAG, "insert(${uri.toString()}, ${values.toString()})->$id")
+
         if (id == -1L) {
             Log.e(TAG, "Failed to insert row for " + uri);
             return null;

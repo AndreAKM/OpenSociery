@@ -1,31 +1,19 @@
 package com.example.opensociety.ui.contacts
 
-import android.app.DatePickerDialog
-import android.app.DatePickerDialog.OnDateSetListener
-import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.DatePicker
-import android.widget.DatePicker.OnDateChangedListener
-import android.widget.EditText
-import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import com.example.opensociety.R
 import com.example.opensociety.connection.CommandFactory
-import com.example.opensociety.connection.Connection
 import com.example.opensociety.databinding.FragmentContactOwnDataEditingBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
 import org.json.JSONObject
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.concurrent.thread
@@ -76,7 +64,7 @@ class ContactOwnDataEditing : Fragment() {
             }
             id != -1L -> context?.let { c ->
                 Contacts(c).get_contact(id!!).also {
-                    Log.d(TAG, "ID: $id, friend: ${it?. let{it.getJson().toString()}}")}
+                    Log.d(TAG, "ID: $id, friend: ${it?. let{it.getWholeJson().toString()}}")}
             } ?: null
             else -> Friend()
         }
@@ -96,18 +84,17 @@ class ContactOwnDataEditing : Fragment() {
                 _binding.birthday.text = friend!!.birthday
                 _binding.IP.text = friend!!.ip
                 _binding.status.text = (friend!!.status.toString())
-                //friend?. let{date = LocalDate.parse(it.birthday , firstApiFormat)}
             }
             else -> {
-                contacts?.getIPAddress(true).also {
+                contacts?.getIPAddress().also {
                     Log.d(TAG, "ID: 1 IP: $it")
-                }.let {
+                }?.let {
                     _binding.IP.setText(it)
                     _binding.status.text = (Friend.Status.OWNER.toString())
                     _binding.birthday.text =
                         "${today.get(Calendar.YEAR)}-${today.get(Calendar.MONTH)}" +
                                 "-${today.get(Calendar.DATE)}"
-                    friend = Friend()
+                    friend = Friend(status = Friend.Status.OWNER, ip = it)
                 }
             }
         }
@@ -125,21 +112,23 @@ class ContactOwnDataEditing : Fragment() {
     }
 
     fun saveData() {
+        val isChanged = friend!!.nick == _binding.nickname.text.toString() ||
+            friend!!.first_name == _binding.firsName.text.toString() ||
+            friend!!.second_name == _binding.secondName.text.toString() ||
+            friend!!.family_name == _binding.familyName.text.toString()
         friend!!.nick = _binding.nickname.text.toString()
         friend!!.first_name = _binding.firsName.text.toString()
         friend!!.second_name = _binding.secondName.text.toString()
         friend!!.family_name = _binding.familyName.text.toString()
-        val newStatus = Friend.Status.OWNER
-        if (newStatus != friend!!.status && 1L != friend!!.id) {
-            friend!!.status = newStatus
+        friend!!.ip = _binding.IP.text.toString()
+        Log.d(TAG,"Save friend: ${friend!!.getWholeJson()}")
+        friend!!.id?. takeIf {it == 1L}?. let { contacts!!.updateContact(friend!!) } ?:
+            contacts!!.add_friend(friend!!)
+        if (isChanged) {
             thread {
                 contacts?.sendToAll(CommandFactory::makeUpdateForm)
             }
         }
-        friend!!.ip = _binding.IP.text.toString()
-        Log.d(TAG,"Save friend: ${friend!!.getJson()}")
-        friend!!.id?. takeIf {it > 0}?. let { contacts!!.updateContact(friend!!) } ?:
-            contacts!!.add_friend(friend!!)
         this.findNavController().popBackStack(R.id.navigation_contact_own_data_editing, true)
     }
 }

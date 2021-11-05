@@ -12,6 +12,7 @@ import androidx.core.content.contentValuesOf
 import com.example.opensociety.connection.CommandFactory
 import com.example.opensociety.connection.Connection
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.Exception
@@ -35,16 +36,28 @@ class Contacts(context: Context) {
             Uri.withAppendedPath(DBContentProvider.BASE_CONTENT_URI, DbStructure.TB_HASH_LIST)
     }
 
-    public fun add_friend(friend: Friend): Long? {
-        val id = context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
-            ContentUris.parseId(it)
-        } ?: return null
-        return id
-    }
+    public fun add_friend(friend: Friend): Long? =
+        find_contacts(JSONObject().put(Friend.HASH, hash))?.let {
+            context.contentResolver.update(
+                CONTACTS_URI,
+                friend.getContentValues(), "${Friend.ID} = ${it[0].id}", null
+            )
+            it[0].id
+        } ?: context.contentResolver.insert(CONTACTS_URI, friend.getContentValues())?.let {
+            val id = ContentUris.parseId(it)
+            if (id == 1L) {
+                context.contentResolver.update(
+                    CONTACTS_URI,
+                    contentValuesOf(Pair(Friend.HASH, calculateHash())),
+                    "${Friend.ID} = $id", null)
+            }
+            id
+        }
+
 
     public fun add_friend(json: JSONObject, status: String): Long? {
         val friend = Friend(json, Friend.Status.valueOf(status))
-        if (find_contact(JSONObject().put(Friend.NICK, friend.nick)
+        if (find_contacts(JSONObject().put(Friend.NICK, friend.nick)
                 .put(Friend.FIRST_NAME, friend.first_name)
                 .put(Friend.SECOND_NAME, friend.second_name)
                 .put(Friend.FAMILY_NAME, friend.family_name)) != null) {
@@ -55,11 +68,6 @@ class Contacts(context: Context) {
 
     public fun add_friend(json: JSONObject) = add_friend(json, json.getString(Friend.STATUS))
 
-    public fun get_contacts(json: JSONObject): Array<Friend> {
-        var result = emptyArray<Friend>()
-        return result
-    }
-
     public  fun get_contact(id:Long): Friend? {
         var cursor = context.contentResolver.query(
             Uri.withAppendedPath(CONTACTS_URI, "1"),
@@ -67,17 +75,24 @@ class Contacts(context: Context) {
         return cursor?.let { cursorToContack(it) } ?: null
     }
 
-    public fun find_contact(json: JSONObject): Array<Friend>? {
+    public fun find_contacts(json: JSONObject): Array<Friend>? {
         var select = ""
         var selectArgs = emptyArray<String>()
         for( i in json.keys()) {
-            select +=  if (select.isEmpty()) {"? = "} else {" AND ? = "} + i
-            selectArgs += json.getString(i)
+            json.getString(i). takeIf { it.isNotEmpty() }?. let {
+                select += if (select.isEmpty()) {
+                    "$i = ?"
+                } else {
+                    " AND $i = ?"
+                }
+                selectArgs += it
+            }
         }
+        Log.d(TAG, "find contact for select: ($select) values:(${selectArgs.toString()})");
         var cursor = context.contentResolver?.query(
             CONTACTS_URI, null, select, selectArgs,
-            "(${Friend.NICK}, ${Friend.FIRST_NAME}, ${Friend.SECOND_NAME}," +
-                    " ${Friend.FAMILY_NAME})" // GROUP BY (${Friend.STATUS})
+            "${Friend.NICK}, ${Friend.FIRST_NAME}, ${Friend.SECOND_NAME}," +
+                    " ${Friend.FAMILY_NAME}" // GROUP BY (${Friend.STATUS})
         )
         return cursor?.let { cursorToContacksArray(it) } ?: null
     }
@@ -111,7 +126,7 @@ class Contacts(context: Context) {
         }
 
     public fun updateContactIP(json: JSONObject) =
-        find_contact(JSONObject().put(Friend.HASH,json.getLong(Friend.HASH)))?.
+        find_contacts(JSONObject().put(Friend.HASH,json.getLong(Friend.HASH)))?.
             get(0)?.id?.let { updateContactIP(it, json.getString(Friend.IP)) }
 
     public fun updateContactHash(json: JSONObject) {
@@ -174,23 +189,30 @@ class Contacts(context: Context) {
     }
 
     public fun sendToAll(makeCommand: (d: Friend, s: Friend) -> JSONObject) {
-        if (isNetworkAvailable(context)) contactsList().takeIf { it.isNotEmpty() }?. let {
+        Log.d(TAG, "send to all")
+        if(isNetworkAvailable(context)) contactsList().takeIf { it.isNotEmpty() }?. let {
             var owner: Friend? = null
+            Log.d(TAG, "size of contact list: ${it.size}")
             for (c in it) {
-                if (c.id == 1L) {
+                if (c.status == Friend.Status.OWNER) {
                     owner = c
-                    Log.d(TAG, "owner is ${owner.getJson()}")
+                    Log.d(TAG, "owner is ${owner.getWholeJson()}")
                 } else if (owner != null){
-                    Log.d(TAG, "Send Updated IP($owner.ip) to ${c.getTitle()}: $c.ip")
+                    Log.d(TAG, "Send Updated IP(${owner.ip}) to ${c.getTitle()}: ${c.ip}")
                     GlobalScope.launch {
                         val command =
                             makeCommand(c, owner!!)
                         try {
+                            Log.d(TAG, "create connection")
                             var connection = Connection(c!!.ip)
+                            Log.d(TAG, "Openning connection")
                             connection.openConnection()
+                            Log.d(TAG, "Sending data")
                             connection.sendData(command.toString())
+                            Log.d(TAG, "finish sending")
                         } catch (e: Exception) {
-                            Log.e(TAG, "can not send $command to ${c.getTitle()}: $c.ip")
+                            Log.e(TAG, "can not send $command to ${c.getTitle()}: ${c.ip}. " +
+                                    "the reason: ${e.message}")
                         }
                     }
                 }
@@ -235,14 +257,13 @@ class Contacts(context: Context) {
                     cursor.getString(cursor.getColumnIndex(Friend.FIRST_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.SECOND_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.FAMILY_NAME)),
-//                    cursor.getString(cursor.getColumnIndex(Friend.BIRTHDAY)),
-                    "01:15:20",
+                    cursor.getString(cursor.getColumnIndex(Friend.BIRTHDAY)),
                     cursor.getString(cursor.getColumnIndex(Friend.AVATAR)),
                     Friend.Status.valueOf(cursor.getString(cursor.getColumnIndex(Friend.STATUS))),
                     cursor.getLong(cursor.getColumnIndex(Friend.HASH)),
                     cursor.getLong(cursor.getColumnIndex(Friend.ID)),
-                    null//cursor.getString(cursor.getColumnIndex(Friend.CREATING_TIME))
-                )
+                    cursor.getString(cursor.getColumnIndex(Friend.CREATING_TIME))
+                ). also { Log.d(TAG, "find friend ${it.getWholeJson()}") }
             } while (cursor.moveToNext())
         }
         return res
@@ -264,7 +285,7 @@ class Contacts(context: Context) {
         return cursor?.let { cursorToContacksArray(it) } ?: emptyArray()
     }
 
-    fun getIPAddress(isIP4: Boolean = true): String {
+    fun getIPAddress(isIP4: Boolean = false): String {
         try {
             val interfaces: List<NetworkInterface> =
                 Collections.list(NetworkInterface.getNetworkInterfaces())

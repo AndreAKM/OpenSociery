@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.opensociety.db.ChatManager
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.*
 import java.net.Socket
@@ -25,13 +26,14 @@ class ConnectionWorker(socket: Socket, context: Context) {
         const val FIND_FRIEND = "find_friend"
         const val GET_HASH = "get_hash"
         const val DATA = "data"
+        const val ANSWER = "answer"
+        const val SOURCE = "source"
     }
 
     suspend fun run() {
         try {
             var reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-            val writer = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())),
-                true)
+            val writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
             while (!socket.isClosed) {
                 Log.d(TAG, "start")
                 val entry = reader.readLine()
@@ -64,7 +66,6 @@ class ConnectionWorker(socket: Socket, context: Context) {
             MESSAGE -> chat_m.registrationInputMessage(json)
             HASH -> contacts.updateContactHash(json.getJSONObject(DATA))
             IP -> contacts.updateContactIP(json.getJSONObject(DATA))
-            GET_CONTATS -> result = contacts.get_contacts(json.getJSONObject(DATA)).toString()
             GET_HASH -> {
                 var rj = JSONObject()
                 rj.put(COMMAND, HASH)
@@ -72,7 +73,18 @@ class ConnectionWorker(socket: Socket, context: Context) {
                     .put(IP, contacts.getIP()))
                 result = rj.toString()
             }
-            FIND_FRIEND -> result = contacts.find_contact(json.getJSONObject(DATA)).toString()
+            FIND_FRIEND -> contacts.find_contacts(json.getJSONObject(DATA))
+                ?.takeIf { it.isNotEmpty() }?.let{
+                    var rj = JSONObject()
+                    rj.put(COMMAND, ANSWER)
+                    var jarray = JSONArray()
+                    for(f in it) {
+                        jarray.put(f.getExportJson())
+                    }
+                    rj.put(DATA, jarray)
+                    rj.put(SOURCE, json)
+                    result = rj.toString()
+                }
         }
         return result
     }

@@ -19,7 +19,7 @@ class DbStructure(context: Context):
         val TB_CHATS_LIST = "chats_list"
         val TB_MESSAGES = "messages"
         val TB_VIEWERS = "viewers"
-        val F_ID = "id"
+        val F_ID = "_id"
         val F_HASH = "hash"
         val F_STATUS = "status"
         val F_IP = "ip"
@@ -51,7 +51,8 @@ class DbStructure(context: Context):
             db.execSQL("CREATE TABLE $TB_CONTACTS ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "$F_IP $DEFAULT_TEXT, $F_NICK_NAME $DEFAULT_TEXT, $F_FIRST_NAME $DEFAULT_TEXT,"+
                     " $F_SECOND_NAME $DEFAULT_TEXT, $F_FAMILY_NAME $DEFAULT_TEXT, $F_AVATAR " +
-                    "$DEFAULT_TEXT, $F_BIRTHDAY TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, $F_HASH INTEGER DEFAULT 0 NOT NULL," +
+                    "$DEFAULT_TEXT, $F_BIRTHDAY TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                    " $F_HASH INTEGER DEFAULT 0 NOT NULL UNIQUE," +
                     " $F_STATUS TEXT DEFAULT \"UNKNOWN\" NOT NULL, $F_CREATIMG_TIME TIMESTAMP" +
                     " DEFAULT CURRENT_TIMESTAMP NOT NULL );")
             db.execSQL("CREATE TABLE $TB_IP_LIST ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +

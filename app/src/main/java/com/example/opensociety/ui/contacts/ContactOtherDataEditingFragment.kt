@@ -11,10 +11,11 @@ import androidx.navigation.fragment.findNavController
 import com.example.opensociety.R
 import com.example.opensociety.connection.CommandFactory
 import com.example.opensociety.connection.Connection
-import com.example.opensociety.databinding.FragmentContactDataBinding
 import com.example.opensociety.databinding.FragmentContactOtherDataEditingBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.concurrent.thread
 
@@ -68,7 +69,7 @@ class ContactOtherDataEditingFragment : Fragment() {
             }
             id != -1L -> context?.let { c ->
                 Contacts(c).get_contact(id!!).also {
-                    Log.d(TAG, "ID: $id, friend: ${it?. let{it.getJson().toString()}}")}
+                    Log.d(TAG, "ID: $id, friend: ${it?. let{it.getWholeJson().toString()}}")}
             } ?: null
             else -> Friend()
         }
@@ -80,7 +81,7 @@ class ContactOtherDataEditingFragment : Fragment() {
         when {
             (friend != null) -> {
                 Log.d(TAG, "Friend(${friend!!.id})'s IP: ${friend!!.ip}")
-                _binding.title.text = friend!!.getTitle()
+                _binding.title.text = friend!!.nick
                 _binding.firsName.text = friend!!.first_name
                 _binding.secondName.text = friend!!.second_name
                 _binding.familyName.text = friend!!.family_name
@@ -88,15 +89,11 @@ class ContactOtherDataEditingFragment : Fragment() {
                 _binding.IP.setText(friend!!.ip)
                 _binding.status.setSelection(friend!!.status.ordinal)
             }
-            id == 1L -> contacts?.getIPAddress(true). also {
+            id == 1L -> contacts?.getIPAddress(). also {
                 Log.d (TAG, "ID: 1 IP: $it") } .let{ _binding.IP.setText(it)
                 _binding.status.setSelection(Friend.Status.OWNER.ordinal)
             }
         }
-        _binding.firsName.isFocusable = false
-        _binding.firsName.isClickable = false
-        _binding.status.isEnabled = false
-        _binding.status.isClickable = false
         _binding.btnYes.setOnClickListener{saveData()}
         _binding.btnCancel.setOnClickListener{this.findNavController().
         popBackStack(R.id.navigation_contact_own_data_editing, true)}
@@ -104,25 +101,24 @@ class ContactOtherDataEditingFragment : Fragment() {
     }
 
     fun saveData() {
-        friend!!.nick = _binding.nickname.text.toString()
-        friend!!.first_name = _binding.firsName.text.toString()
-        friend!!.second_name = _binding.secondName.text.toString()
-        friend!!.family_name = _binding.familyName.text.toString()
-        val newStatus = Friend.Status.intToStatus(_binding.status.selectedItemId.toInt())
-        if (newStatus != friend!!.status && 1L != friend!!.id) {
-            friend!!.status = newStatus
-            thread {
+        friend!!.status = Friend.Status.intToStatus(_binding.status.selectedItemId.toInt())
+
+        GlobalScope.launch {
+            try {
                 val command =
                     CommandFactory.makeAskingAccess(friend!!, contacts!!.get_contact(1L)!!)
                 var connection = Connection(friend!!.ip)
                 connection.openConnection()
                 connection.sendData(command.toString())
+            } catch (e:Exception){
+                Log.e(TAG, "error sending: ${e.message}")
             }
         }
+
         friend!!.ip = _binding.IP.text.toString()
-        Log.d(TAG,"Save friend: ${friend!!.getJson()}")
+        Log.d(TAG,"Save friend: ${friend!!.getWholeJson()}")
         friend!!.id?. takeIf {it > 0}?. let { contacts!!.updateContact(friend!!) } ?:
         contacts!!.add_friend(friend!!)
-        this.findNavController().popBackStack(R.id.navigation_contact_own_data_editing, true)
+        this.findNavController().popBackStack(R.id.novigation_contact_other_data_editing_fragment, true)
     }
 }

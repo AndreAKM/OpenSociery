@@ -12,12 +12,6 @@ import com.example.opensociety.databinding.FragmentContactDataBinding
 import com.example.opensociety.db.Contacts
 import com.example.opensociety.db.Friend
 import org.json.JSONObject
-import android.widget.DatePicker
-
-import android.app.DatePickerDialog.OnDateSetListener
-
-import android.app.DatePickerDialog
-import android.app.Dialog
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -64,13 +58,14 @@ class ContactDataFragment : Fragment() {
         id = arg!!.getLong(CONTACT_ID, -1L)
         friend = when {
             id == -1L && arg != null -> {
-                arg!!.getString(CONTACT_DATA)?.let {
-                    Friend(JSONObject(it))
+                arg!!.getString(CONTACT_DATA)?.let { json ->
+                    Friend(JSONObject(json))
                 } ?: Friend()
             }
             id != -1L -> context?.let { c ->
                 Contacts(c).get_contact(id!!).also {
-                    Log.d(TAG, "ID: $id, friend: ${it?. let{it.getJson().toString()}}")}
+                    Log.d(TAG, "ID: $id, friend: ${it?. let{it.getWholeJson().toString()}}")
+                }
             } ?: null
             else -> Friend()
         }
@@ -84,8 +79,9 @@ class ContactDataFragment : Fragment() {
                 _binding.birthday.text = friend!!.birthday
                 _binding.IP.text = friend!!.ip
                 _binding.status.text = (friend!!.status.toString())
+                id = friend!!.id
             }
-            id == 1L -> contacts?.getIPAddress(true). also {
+            id == 1L -> contacts?.getIPAddress(). also {
                 Log.d (TAG, "ID: 1 IP: $it") } .let{
                 _binding.IP.text = it
                 _binding.status.text = (Friend.Status.OWNER.toString())
@@ -100,6 +96,7 @@ class ContactDataFragment : Fragment() {
         _binding.firsName.isClickable = false
         _binding.status.isEnabled = false
         _binding.status.isClickable = false
+        Log.d(TAG, "contact_id: $id")
         _binding.btnEdit.setOnClickListener{
                 findNavController().navigate(when(id) {
                     1L -> R.id.navigation_contact_own_data_editing

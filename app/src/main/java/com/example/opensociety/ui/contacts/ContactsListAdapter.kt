@@ -43,7 +43,7 @@ class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<Contac
         holder.itemView.setOnClickListener{
             Log.d(TAG, "click Item: " + position)
             val bundle = bundleOf(CONTACT_DATA to
-                contacts[position].getJson().toString())
+                contacts[position].getWholeJson().toString())
 
             Log.d(TAG, "bundle: $bundle")
             holder.itemView.findNavController().navigate(

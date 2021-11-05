@@ -10,12 +10,12 @@ import com.example.opensociety.db.Friend
 import org.json.JSONObject
 import kotlin.concurrent.fixedRateTimer
 
-class ContactDataViewModel(application: Application, id:Int) : AndroidViewModel(application) {
+class ContactDataViewModel(application: Application, id:Long) : AndroidViewModel(application) {
     val context = application.applicationContext
     var contacts = Contacts(context)
     var id = id
     private val _friend = MutableLiveData<Friend>().apply {
-        value = contacts.find_contact(JSONObject().put(Friend.ID, id))?.let{it[0]} ?: null
+        value = contacts.get_contact(id)?.let{it} ?: null
     }
     private val friend: LiveData<Friend>  = _friend
 }

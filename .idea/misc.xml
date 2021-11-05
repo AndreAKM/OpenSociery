@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.22239583333333332" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/drawable/ic_dashboard_black_24dp.xml" value="0.22239583333333332" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.22239583333333332" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/drawable/ic_launcher_background.xml" value="0.22239583333333332" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/drawable/ic_notifications_black_24dp.xml" value="0.22239583333333332" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/activity_main.xml" value="0.10144927536231885" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/chat_fragment.xml" value="0.19479166666666667" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/chat_message_layout.xml" value="0.2598958333333333" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/chat_other_message_layout.xml" value="0.2598958333333333" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/chat_own_message_layout.xml" value="0.2557291666666667" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/contact_data_fragment.xml" value="0.20625" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/contact_recycle_item.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_chats.xml" value="0.20625" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_contacs_list.xml" value="0.29347826086956524" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_contact_data.xml" value="0.18489583333333334" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_contact_other_data_editing.xml" value="0.245018115942029" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_contact_own_data_editing.xml" value="0.20364583333333333" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_contacts.xml" value="0.26197916666666665" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_dashboard.xml" value="0.20625" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_home.xml" value="0.10144927536231885" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/layout/fragment_notifications.xml" value="0.20625" />
+        <entry key="..\:/Users/ANMO1405/AndroidStudioProjects/OpenSociety/app/src/main/res/menu/bottom_nav_menu.xml" value="0.20625" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
