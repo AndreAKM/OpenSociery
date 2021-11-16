@@ -39,7 +39,7 @@ class ContactsListAdapter(context:FragmentActivity): RecyclerView.Adapter<Contac
         holder.largeTextView?.text = contacts[position].getTitle()
 
         holder.smallTextView?.text = contacts[position].status.toString() +
-                "\n" + contacts[position].ip
+                "\n ${contacts[position].ip}:${contacts[position].port} "
         holder.itemView.setOnClickListener{
             Log.d(TAG, "click Item: " + position)
             val bundle = bundleOf(CONTACT_DATA to

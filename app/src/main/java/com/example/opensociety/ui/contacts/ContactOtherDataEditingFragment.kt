@@ -108,7 +108,7 @@ class ContactOtherDataEditingFragment : Fragment() {
             try {
                 val command =
                     CommandFactory.makeAskingAccess(friend!!, contacts!!.get_contact(1L)!!)
-                var connection = Connection(friend!!.ip)
+                var connection = Connection(friend!!.ip, friend!!.port)
                 connection.openConnection()
                 connection.sendData(command.toString())
             } catch (e:Exception){
@@ -120,6 +120,7 @@ class ContactOtherDataEditingFragment : Fragment() {
         Log.d(TAG,"Save friend: ${friend!!.getWholeJson()}")
         friend!!.id?. takeIf {it > 0}?. let { contacts!!.updateContact(friend!!) } ?:
         contacts!!.add_friend(friend!!)
-        this.findNavController().popBackStack(R.id.novigation_contact_other_data_editing_fragment, true)
+        this.findNavController().popBackStack(R.id.novigation_contact_other_data_editing_fragment,
+            true)
     }
 }

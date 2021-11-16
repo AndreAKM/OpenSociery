@@ -2,6 +2,7 @@ package com.example.opensociety.connection
 
 import android.content.Context
 import android.util.Log
+import com.example.opensociety.connection.stun.StunClient
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
@@ -17,7 +18,8 @@ class Server(context: Context) {
 
     private val context = context
     var serverSoket: ServerSocket? = null
-    val port = SERVER_PORT
+    var port = SERVER_PORT
+    var serverIP: InetAddress? = null
 
     sealed class StatusMsg {
         object IncCounter : StatusMsg()
@@ -108,8 +110,16 @@ class Server(context: Context) {
                 is StatusMsg.GoToWork -> {
                     Log.d(TAG, "actor gets GoToWork: current status $status")
                     if(status == Status.STOPPED) {
-                        status = Status.WORKING
+                        status = Status.GOTOWORK
+                        val prepare = GlobalScope.async {
+                            Log.d(TAG, "start stun to find external IP and Port")
+                            val stun = StunClient(getIPAddress()!!, port)
+                            stun.getAddress()!!.also {serverIP = it.first; port = it.second }
+                            status = Status.WORKING
+                        }
                         mainThread = GlobalScope.launch {
+                            Log.d (TAG, "wait stun")
+                            prepare.await()
                             Log.d(TAG, "main thread: started")
                             server()
                             Log.d(TAG, "main thread: going to stop waiting jobs")
@@ -185,9 +195,9 @@ class Server(context: Context) {
         }
     }
 
-     init {
+     /*init {
          start()
-     }
+     }*/
 
     suspend fun status() = getStatus(actor)
 
@@ -205,7 +215,7 @@ class Server(context: Context) {
     suspend fun server(): String {
         waitStatus(Status.WORKING)
         Log.d(TAG, "Server start on port : $port")
-        serverSoket = ServerSocket(port,50, getIPAddress())
+        serverSoket = ServerSocket(port,50, serverIP)
 
         Log.d(TAG, "Server status:${getStatus(actor)}")
         while (getStatus(actor) == Status.WORKING) {

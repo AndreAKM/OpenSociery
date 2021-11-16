@@ -205,15 +205,15 @@ class Contacts(context: Context) {
                             makeCommand(c, owner!!)
                         try {
                             Log.d(TAG, "create connection")
-                            var connection = Connection(c!!.ip)
+                            var connection = Connection(c!!.ip, c!!.port)
                             Log.d(TAG, "Openning connection")
                             connection.openConnection()
                             Log.d(TAG, "Sending data")
                             connection.sendData(command.toString())
                             Log.d(TAG, "finish sending")
                         } catch (e: Exception) {
-                            Log.e(TAG, "can not send $command to ${c.getTitle()}: ${c.ip}. " +
-                                    "the reason: ${e.message}")
+                            Log.e(TAG, "can not send $command to ${c.getTitle()}: " +
+                                    "${c.ip}:${c.port}. the reason: ${e.message}")
                         }
                     }
                 }
@@ -234,6 +234,7 @@ class Contacts(context: Context) {
     private fun cursorToContack(cursor: Cursor) = cursor.takeIf { it.moveToFirst() }?. let {
                 Friend(
                     cursor.getString(cursor.getColumnIndex(Friend.IP)),
+                    cursor.getInt(cursor.getColumnIndex(Friend.PORT)),
                     cursor.getString(cursor.getColumnIndex(Friend.NICK)),
                     cursor.getString(cursor.getColumnIndex(Friend.FIRST_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.SECOND_NAME)),
@@ -254,6 +255,7 @@ class Contacts(context: Context) {
             do {
                 res += Friend(
                     cursor.getString(cursor.getColumnIndex(Friend.IP)),
+                    cursor.getInt(cursor.getColumnIndex(Friend.PORT)),
                     cursor.getString(cursor.getColumnIndex(Friend.NICK)),
                     cursor.getString(cursor.getColumnIndex(Friend.FIRST_NAME)),
                     cursor.getString(cursor.getColumnIndex(Friend.SECOND_NAME)),

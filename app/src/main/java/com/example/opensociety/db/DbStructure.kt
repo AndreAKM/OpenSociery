@@ -23,6 +23,7 @@ class DbStructure(context: Context):
         val F_HASH = "hash"
         val F_STATUS = "status"
         val F_IP = "ip"
+        val F_PORT = "port"
         val F_IP_ID = "ip_id"
         val F_NICK_NAME = "nick_name"
         val F_FIRST_NAME = "first_name"
@@ -49,9 +50,10 @@ class DbStructure(context: Context):
     override fun onCreate(db: SQLiteDatabase?) {
         if (db != null) {
             db.execSQL("CREATE TABLE $TB_CONTACTS ($F_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "$F_IP $DEFAULT_TEXT, $F_NICK_NAME $DEFAULT_TEXT, $F_FIRST_NAME $DEFAULT_TEXT,"+
-                    " $F_SECOND_NAME $DEFAULT_TEXT, $F_FAMILY_NAME $DEFAULT_TEXT, $F_AVATAR " +
-                    "$DEFAULT_TEXT, $F_BIRTHDAY TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+                    "$F_IP $DEFAULT_TEXT, $F_PORT $DEFAULT_INT, $F_NICK_NAME $DEFAULT_TEXT," +
+                    " $F_FIRST_NAME $DEFAULT_TEXT, $F_SECOND_NAME $DEFAULT_TEXT," +
+                    " $F_FAMILY_NAME $DEFAULT_TEXT, $F_AVATAR $DEFAULT_TEXT," +
+                    " $F_BIRTHDAY TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                     " $F_HASH INTEGER DEFAULT 0 NOT NULL UNIQUE," +
                     " $F_STATUS TEXT DEFAULT \"UNKNOWN\" NOT NULL, $F_CREATIMG_TIME TIMESTAMP" +
                     " DEFAULT CURRENT_TIMESTAMP NOT NULL );")

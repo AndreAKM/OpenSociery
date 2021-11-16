@@ -29,10 +29,6 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import android.app.PendingIntent
 
-
-
-
-
 class FoneClientService : Service() {
     val TAG = "FoneClientService"
     private var server:Server = Server(this)
@@ -97,13 +93,7 @@ class FoneClientService : Service() {
         channel.setLightColor(Color.RED);
         channel.enableVibration(true);
         notificationManager.createNotificationChannel(channel);
-        /* Create Pending Intents.
-        // Create Pending Intents.
-        val piLaunchMainActivity: PendingIntent = getLaunchActivityPI(context)*/
         val piStopService: PendingIntent = getStopServicePI(this)
-
-        // Action to stop the service.
-
         // Action to stop the service.
         val stopAction: Notification.Action = Notification.Action.Builder(
             R.drawable.btn_dialog,

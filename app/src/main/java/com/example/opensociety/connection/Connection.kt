@@ -9,11 +9,11 @@ import java.io.OutputStreamWriter
 import java.io.PrintWriter
 
 
-class Connection(host: String) {
+class Connection(host: String, port: Int) {
     private final val TAG = "Connection"
     private var socket: Socket? = null
     private var host = host
-    private var port = 9876
+    private var port = port
 
     public fun openConnection() {
         closeConnection();

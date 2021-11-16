@@ -5,7 +5,7 @@ import androidx.core.content.contentValuesOf
 import org.json.JSONObject
 import java.util.*
 
-class Friend(ip: String = "", nick: String = "",
+class Friend(ip: String = "", port: Int = 0, nick: String = "",
              first_name: String = "", second_name: String = "",
              family_name: String = "", birthday:String = "", avatar: String = "",
              status: Status = Status.APPLIED, hash:Long = 0, id: Long? = null,
@@ -13,6 +13,7 @@ class Friend(ip: String = "", nick: String = "",
 
     var id: Long? = id
     var ip = ip
+    var port = port
     var nick = nick
     var first_name = first_name
     var second_name = second_name
@@ -52,6 +53,7 @@ class Friend(ip: String = "", nick: String = "",
     companion object {
         val ID = DbStructure.F_ID
         val IP = DbStructure.F_IP
+        val PORT = DbStructure.F_PORT
         val NICK = DbStructure.F_NICK_NAME
         val FIRST_NAME = DbStructure.F_FIRST_NAME
         val SECOND_NAME = DbStructure.F_SECOND_NAME
@@ -65,6 +67,7 @@ class Friend(ip: String = "", nick: String = "",
         val COLUMNS = arrayOf(
             ID,
             IP,
+            PORT,
             NICK,
             FIRST_NAME,
             SECOND_NAME,
@@ -76,7 +79,7 @@ class Friend(ip: String = "", nick: String = "",
     }
 
     constructor(jsonObject: JSONObject, status: Status) : this(jsonObject.getString(IP),
-        jsonObject.getString(NICK), jsonObject.getString(FIRST_NAME),
+        jsonObject.getInt(PORT), jsonObject.getString(NICK), jsonObject.getString(FIRST_NAME),
         jsonObject.getString(SECOND_NAME), jsonObject.getString(FAMILY_NAME),
         jsonObject.getString(BIRTHDAY), jsonObject.getString(AVATAR), status,
         jsonObject.getLong(HASH)) {
@@ -100,6 +103,7 @@ class Friend(ip: String = "", nick: String = "",
     public fun getContentValues(): ContentValues {
         var r = contentValuesOf(
             Pair(IP, ip),
+            Pair(PORT, port),
             Pair(NICK, nick),
             Pair(FIRST_NAME, first_name),
             Pair(SECOND_NAME,second_name),
@@ -115,6 +119,7 @@ class Friend(ip: String = "", nick: String = "",
 
     public fun getExportJson() = JSONObject()
             .put(IP, ip)
+            .put(PORT, port)
             .put(NICK, nick)
             .put(FIRST_NAME, first_name)
             .put(SECOND_NAME,second_name)
@@ -126,6 +131,7 @@ class Friend(ip: String = "", nick: String = "",
 
     public fun getWholeJson() = JSONObject()
         .put(IP, ip)
+        .put(PORT, port)
         .put(NICK, nick)
         .put(FIRST_NAME, first_name)
         .put(SECOND_NAME,second_name)
